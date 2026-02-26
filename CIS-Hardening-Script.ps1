@@ -1,61 +1,61 @@
-# CIS Hardening Script for Windows 11 Pro/Enterprise
+# CIS Tier 2 Hardening Script for Windows 11 Pro and Enterprise
 
-# This script is designed to implement CIS Tier 2 hardening recommendations for Windows 11 Pro/Enterprise.
+This script implements a comprehensive set of security configurations based on the CIS (Center for Internet Security) benchmarks for Windows 11 Pro and Enterprise. It is divided into detailed sections to ensure a structured approach to hardening the system.
 
-## Group Policy Configuration
+## 1. Group Policy Modifications
 
-# Disable Guest account
-net user guest /active:no
+```powershell
+# Enable Account Lockout Policy
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "LockoutBadCount" -Value 5
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ResetLockoutCount" -Value 15
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "LockoutDuration" -Value 15
 
-# Audit Logon Events
-secedit /set /cfg "CIS_Audit_Logon_Events.inf"
+# Configure Password Policy
+Set-AccountPolicy -MaxPasswordAge 30
+Set-AccountPolicy -MinPasswordLength 12
+```
 
-# Configure password policies
-secedit /set /cfg "CIS_Password_Policy.inf"
+## 2. Registry Modifications
 
-# Enable security auditing for account management events
-secedit /set /cfg "CIS_Account_Management.inf"
-
-## Registry Modifications
-
-# Disable Windows Script Host
-Set-ItemProperty -Path 'HKLM:\Software\Microsoft\Windows Script Host\Settings' -Name 'Enabled' -Value 0
-
-# Prevent users from installing printers
-Set-ItemProperty -Path 'HKLM:\Software\Policies\Microsoft\Windows NT\Printers' -Name 'RestrictDriverInstallationToAdministrators' -Value 1
-
-# Disable Remote Desktop
-Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections' -Value 1
-
-## Firewall Rules
-
-# Enable Firewall
-Set-NetFirewallProfile -All -Enabled True
-
-# Allow only necessary incoming connections
-New-NetFirewallRule -DisplayName 'Allow ICMPv4-In' -Protocol ICMPv4 -IcmpType 8 -Action Allow
-New-NetFirewallRule -DisplayName 'Allow HTTP' -Direction Inbound -Protocol TCP -LocalPort 80 -Action Allow
-New-NetFirewallRule -DisplayName 'Allow HTTPS' -Direction Inbound -Protocol TCP -LocalPort 443 -Action Allow
-
-## Security Settings
-
-# Enable Windows Defender Antivirus
-Set-MpPreference -DisableRealtimeMonitoring $false
-
-# Turn on Controlled Folder Access
-Set-MpPreference -EnableControlledFolderAccess Enabled
-
-## Service Hardening
-
+```powershell
 # Disable SMBv1
-Set-Service -Name lanmanserver -StartupType Disabled
-Set-Service -Name lanmanworkstation -StartupType Disabled
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -Name "SMB1" -Value 0
 
+# Enable Windows Defender
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows Defender\Real-Time Protection" -Name "DisableRealtimeMonitoring" -Value 0
+```
+
+## 3. Firewall Rules
+
+```powershell
+# Block inbound SMB traffic
+New-NetFirewallRule -DisplayName "Block SMB Inbound" -Direction Inbound -Protocol TCP -LocalPort 445 -Action Block
+
+# Allow Windows Update
+New-NetFirewallRule -DisplayName "Allow Windows Update" -Direction Outbound -Protocol TCP -DestinationPort 443 -Action Allow
+```
+
+## 4. Security Settings
+
+```powershell
+# Enable User Account Control
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Value 1
+
+# Enable BitLocker
+Enable-BitLocker -MountPoint "C:" -EncryptionMethod Aes256 -UsedSpaceOnly
+```
+
+## 5. Service Hardening
+
+```powershell
 # Disable unnecessary services
-Stop-Service -Name WSearch -Force
-Set-Service -Name WSearch -StartupType Disabled
+Stop-Service -Name "Fax" -Force
+Set-Service -Name "Fax" -StartupType Disabled
 
-# Enable security features
-Set-Service -Name WindowsUpdate -StartupType Automatic
+Stop-Service -Name "XblGameSave" -Force
+Set-Service -Name "XblGameSave" -StartupType Disabled
+```
 
-Write-Host 'CIS Tier 2 hardening script has been applied successfully.'
+## Conclusion
+
+This script serves as a foundation for hardening Windows 11 Pro and Enterprise systems according to the CIS Tier 2 benchmarks. Regular audits and updates based on the latest security best practices are recommended.
