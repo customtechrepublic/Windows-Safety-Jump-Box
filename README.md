@@ -22,7 +22,7 @@ The **Windows Safety Jump Box** project is designed to provide a secure and effi
 We welcome contributions from the community! If you'd like to improve the project, please fork the repository and submit a pull request. Your input helps us make the project better for everyone.
 
 ## Contact Us
-Have questions? Reach out to us at [customtechrepublic@example.com](mailto:customtechrepublic@example.com).
+Have questions? Reach out to us at [customtechrepublic@example.com](mailto:daniel@custompcrepublic.com).
 
 ---
 
