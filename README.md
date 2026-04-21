@@ -1,32 +1,30 @@
-<img width="800" height="436" alt="image" src="https://github.com/user-attachments/assets/25c2df96-119b-4f29-abe1-4b0dce85842c" />
-
-
 # Windows Safety Jump Box
 
-The **Windows Safety Jump Box** project is designed to provide a secure and efficient solution for managing remote desktop connections. This tool simplifies access to remote servers while enhancing security protocols to protect sensitive data.
+## Comprehensive Features
 
-## Features
-- **Easy Remote Access**: Seamlessly connect to your servers without compromising on security.
-- **Enhanced Security**: Utilize multi-factor authentication and advanced encryption for all connections.
-- **User-Friendly Interface**: Intuitive design for both novice and experienced users.
-- **Comprehensive Logging**: Keep track of all access attempts and activities for accountability.
+### Architecture Diagrams
+- Detailed architecture diagrams illustrating the system components and their interactions.
 
-## Getting Started
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/customtechrepublic/Windows-Safety-Jump-Box.git
-   ```
-2. Follow the installation instructions in the `INSTALL.md` file.
+### Backend/Frontend Architecture
+- Description of backend technologies (e.g., Server, Database) and frontend frameworks used (e.g., React, Angular).
 
-## Contributing
-We welcome contributions from the community! If you'd like to improve the project, please fork the repository and submit a pull request. Your input helps us make the project better for everyone.
+### Development Roadmap
+- A well-defined development roadmap outlining planned features, improvements, and timelines.
 
-## Contact Us
-Have questions? Reach out to us at [customtechrepublic@example.com](mailto:daniel@custompcrepublic.com).
+### Output Formats
+- **ISO**: Disc image format for distribution.
+- **VHD**: Virtual Hard Disk format for virtualization.
+- **WIM**: Windows Imaging Format for deployment.
+- **IMG**: General image format for various uses.
 
----
+### UUP Download Integration
+- Integration with the Unified Update Platform (UUP) for streamlined Windows updates.
 
-### Visit Our Website
-For more information, or for a fully managed option of this deployment and cybersecurity and all IT support please visit our [official website](https://www.custompcrepublic.com).
+### CIS Benchmark Compliance
+- Compliance with CIS Benchmarks for security best practices and guidelines.
 
-Thank you for checking out **Windows Safety Jump Box**!
+### Modern Workplace Framework Compatibility
+- Compatibility with modern workplace frameworks ensuring seamless integration with corporate environments.
+
+### Well-Architected Framework Support
+- Support for well-architected frameworks, ensuring best practices in cloud architecture are followed.
