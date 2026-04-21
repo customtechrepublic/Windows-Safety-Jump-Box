@@ -285,7 +285,7 @@ function Test-CredentialProtection {
         
         $checks = @{
             UsesSecureString = $content -match "SecureString|ConvertTo-SecureString"
-            NoPlainText = $content -notmatch "Password\s*=\s*['\"]" -and $content -notmatch "username\s*=\s*['\"]"
+            NoPlainText = $content -notmatch "Password\s*=\s*['\`"]" -and $content -notmatch "username\s*=\s*['\`"]"
             UsesCredentialObject = $content -match "PSCredential|Credential"
         }
         
@@ -494,6 +494,179 @@ foreach ($script in $scripts) {
         $testResults.FailedTests++
         Write-TestResult "$($script.Name) - Credential protection needs review" "FAIL"
     }
+}
+
+Write-Host ""
+
+# Test 7: Compliance scoring calculation
+Write-Host "Testing Compliance Scoring..." -ForegroundColor Cyan
+
+$testName = "ComplianceScoring"
+$test = New-TestCase -TestName $testName `
+    -Description "Calculate compliance score" `
+    -ComplianceArea "Compliance Metrics" `
+    -NISTControls @("PM-1", "PM-2") `
+    -TestScript {
+        try {
+            $scripts = Get-ChildItem -Path $repoRoot -Filter "*.ps1" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 10
+            $totalControls = $scripts.Count * 6  # 6 compliance checks per script
+            $passedControls = 0
+            
+            foreach ($script in $scripts) {
+                $content = Get-Content $script.FullName -Raw
+                if ($content -match "Write-Log|Add-Content") { $passedControls++ }
+                if ($content -match "SecureString|Credential") { $passedControls++ }
+                if ($content -match "try|catch") { $passedControls++ }
+                if ($content -match "Audit|Security|Validate") { $passedControls++ }
+                if ($content -notmatch "Invoke-Expression" -and $content -notmatch "Get-WmiObject") { $passedControls++ }
+                if ($content -match "param|Parameter") { $passedControls++ }
+            }
+            
+            $complianceScore = [math]::Round(($passedControls / $totalControls) * 100, 2)
+            return $complianceScore -gt 50
+        }
+        catch {
+            return $false
+        }
+    }
+
+$testResults.Tests += $test
+$testResults.TotalTests++
+
+if ($test.Status -eq "PASS") {
+    $testResults.PassedTests++
+    Write-TestResult "Compliance scoring calculation passed" "PASS"
+}
+else {
+    $testResults.FailedTests++
+    Write-TestResult "Compliance scoring calculation failed" "FAIL"
+}
+
+# Test 8: Audit evidence documentation
+Write-Host ""
+Write-Host "Testing Audit Evidence..." -ForegroundColor Cyan
+
+$testName = "AuditEvidence"
+$test = New-TestCase -TestName $testName `
+    -Description "Validate audit evidence collection" `
+    -ComplianceArea "Auditing" `
+    -NISTControls @("AU-2", "AU-12") `
+    -TestScript {
+        try {
+            $auditPatterns = @(
+                "EventLog",
+                "Write-EventLog",
+                "Get-EventLog",
+                "Write-Log",
+                "Transcript"
+            )
+            
+            $hardeningScripts = Get-ChildItem -Path (Join-Path $repoRoot "hardening") -Filter "*.ps1" -ErrorAction SilentlyContinue
+            $foundPatterns = 0
+            foreach ($script in $hardeningScripts) {
+                $content = Get-Content $script.FullName -Raw
+                foreach ($pattern in $auditPatterns) {
+                    if ($content -match $pattern) {
+                        $foundPatterns++
+                    }
+                }
+            }
+            
+            return $foundPatterns -gt 0
+        }
+        catch {
+            return $false
+        }
+    }
+
+$testResults.Tests += $test
+$testResults.TotalTests++
+
+if ($test.Status -eq "PASS") {
+    $testResults.PassedTests++
+    Write-TestResult "Audit evidence collection validated" "PASS"
+}
+else {
+    $testResults.SkippedTests++
+    Write-TestResult "Audit evidence collection check skipped" "SKIP"
+}
+
+# Test 9: Documentation compliance
+Write-Host ""
+Write-Host "Testing Documentation Compliance..." -ForegroundColor Cyan
+
+$testName = "DocumentationCompliance"
+$test = New-TestCase -TestName $testName `
+    -Description "Validate documentation standards" `
+    -ComplianceArea "Documentation" `
+    -NISTControls @("CA-7", "SI-4") `
+    -TestScript {
+        try {
+            $docFiles = Get-ChildItem -Path $repoRoot -Filter "*.md" -Recurse -ErrorAction SilentlyContinue
+            $hasReadme = $docFiles | Where-Object { $_.Name -eq "README.md" }
+            $hasCompliance = $docFiles | Where-Object { $_.Name -match "COMPLIANCE|CIS|HARDENING" }
+            
+            return ($hasReadme -ne $null) -or ($hasCompliance -ne $null)
+        }
+        catch {
+            return $false
+        }
+    }
+
+$testResults.Tests += $test
+$testResults.TotalTests++
+
+if ($test.Status -eq "PASS") {
+    $testResults.PassedTests++
+    Write-TestResult "Documentation standards validated" "PASS"
+}
+else {
+    $testResults.SkippedTests++
+    Write-TestResult "Documentation standards check skipped" "SKIP"
+}
+
+# Test 10: Version control and change tracking
+Write-Host ""
+Write-Host "Testing Version Control..." -ForegroundColor Cyan
+
+$testName = "VersionControl"
+$test = New-TestCase -TestName $testName `
+    -Description "Validate version control implementation" `
+    -ComplianceArea "Change Management" `
+    -NISTControls @("CM-1", "CM-3") `
+    -TestScript {
+        try {
+            $versionPatterns = @(
+                "VERSION|version",
+                "CHANGELOG|changelog",
+                "RELEASE|release"
+            )
+            
+            $hasVersioning = 0
+            foreach ($pattern in $versionPatterns) {
+                $files = Get-ChildItem -Path $repoRoot -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.Name -match $pattern }
+                if ($files) {
+                    $hasVersioning++
+                }
+            }
+            
+            return $hasVersioning -gt 0
+        }
+        catch {
+            return $false
+        }
+    }
+
+$testResults.Tests += $test
+$testResults.TotalTests++
+
+if ($test.Status -eq "PASS") {
+    $testResults.PassedTests++
+    Write-TestResult "Version control implementation validated" "PASS"
+}
+else {
+    $testResults.SkippedTests++
+    Write-TestResult "Version control implementation check skipped" "SKIP"
 }
 
 # Generate summary

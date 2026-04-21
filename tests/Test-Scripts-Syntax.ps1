@@ -213,12 +213,183 @@ foreach ($script in $scripts) {
     }
 }
 
-# Generate summary
+# Test function: Check file encoding
+function Test-FileEncoding {
+    param(
+        [string]$FilePath
+    )
+    
+    $result = @{
+        FilePath = $FilePath
+        FileName = Split-Path -Leaf $FilePath
+        Status = "PASS"
+        DetectedEncoding = ""
+        Warnings = @()
+    }
+    
+    try {
+        $fileInfo = Get-Item $FilePath
+        $bytes = Get-Content $FilePath -Encoding Byte -TotalCount 4
+        
+        # Detect BOM
+        if ($bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
+            $result.DetectedEncoding = "UTF-8 BOM"
+        }
+        elseif ($bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) {
+            $result.DetectedEncoding = "UTF-16 LE"
+        }
+        elseif ($bytes[0] -eq 0xFE -and $bytes[1] -eq 0xFF) {
+            $result.DetectedEncoding = "UTF-16 BE"
+        }
+        else {
+            $result.DetectedEncoding = "ASCII/UTF-8 No BOM"
+        }
+        
+        # Warning if not UTF-8
+        if ($result.DetectedEncoding -notmatch "UTF-8") {
+            $result.Warnings += "Non-standard encoding detected: $($result.DetectedEncoding)"
+            $result.Status = "WARN"
+        }
+    }
+    catch {
+        $result.Status = "FAIL"
+        $result.Warnings += "Error detecting encoding: $_"
+    }
+    
+    return $result
+}
+
+# Test function: Check file permissions
+function Test-FilePermissions {
+    param(
+        [string]$FilePath
+    )
+    
+    $result = @{
+        FilePath = $FilePath
+        FileName = Split-Path -Leaf $FilePath
+        Status = "PASS"
+        IsReadable = $false
+        IsWritable = $false
+        Owner = ""
+        Warnings = @()
+    }
+    
+    try {
+        $fileInfo = Get-Item $FilePath
+        $result.IsReadable = $fileInfo.CanRead
+        $result.IsWritable = $fileInfo.CanWrite
+        
+        # Get owner info
+        $acl = Get-Acl $FilePath
+        $result.Owner = $acl.Owner
+        
+        if (-not $result.IsReadable) {
+            $result.Warnings += "File is not readable"
+            $result.Status = "WARN"
+        }
+        
+        if ($result.IsWritable -and $FilePath -notmatch "\\tests\\") {
+            # Production scripts shouldn't be directly writable
+            $result.Warnings += "Production script has write permissions"
+            $result.Status = "WARN"
+        }
+    }
+    catch {
+        $result.Status = "FAIL"
+        $result.Warnings += "Error checking permissions: $_"
+    }
+    
+    return $result
+}
+
+# Test function: Check for encoding issues
+function Test-EncodingCompliance {
+    param(
+        [string]$FilePath
+    )
+    
+    $result = @{
+        FilePath = $FilePath
+        FileName = Split-Path -Leaf $FilePath
+        Status = "PASS"
+        Issues = @()
+    }
+    
+    try {
+        $content = Get-Content $FilePath -Raw
+        
+        # Check for mixed line endings
+        $crlfCount = ($content | Select-String -Pattern "`r`n" -AllMatches).Matches.Count
+        $lfOnlyCount = ($content -replace "`r`n", "" | Select-String -Pattern "`n" -AllMatches).Matches.Count
+        $crOnlyCount = ($content -replace "`r`n", "" -replace "`n", "" | Select-String -Pattern "`r" -AllMatches).Matches.Count
+        
+        if ($lfOnlyCount -gt 0 -or $crOnlyCount -gt 0) {
+            $result.Issues += "Mixed line endings detected"
+            $result.Status = "WARN"
+        }
+        
+        # Check for trailing whitespace
+        $lines = $content -split "`n"
+        $trailingWhitespaceLines = @($lines | Where-Object { $_ -match '\s+$' }).Count
+        if ($trailingWhitespaceLines -gt 0) {
+            $result.Issues += "Found $trailingWhitespaceLines lines with trailing whitespace"
+            $result.Status = "WARN"
+        }
+        
+        # Check for tabs vs spaces consistency
+        $tabLines = @($lines | Where-Object { $_ -match "`t" }).Count
+        $spaceIndentedLines = @($lines | Where-Object { $_ -match "^[ ]+" }).Count
+        if ($tabLines -gt 0 -and $spaceIndentedLines -gt 0) {
+            $result.Issues += "Mixed tabs and spaces for indentation"
+            $result.Status = "WARN"
+        }
+    }
+    catch {
+        $result.Status = "FAIL"
+        $result.Issues += "Error checking encoding: $_"
+    }
+    
+    return $result
+}
+
+# Additional tests
 Write-Host ""
-Write-Host "╔════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║                      TEST SUMMARY                             ║" -ForegroundColor Cyan
-Write-Host "╚════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
-Write-Host ""
+Write-Host "Additional Validation Tests..." -ForegroundColor Cyan
+
+# Test encoding compliance on a sample of scripts
+Write-Host "Testing File Encoding Compliance..." -ForegroundColor Cyan
+$encodingTestCount = 0
+$encodingPassCount = 0
+foreach ($script in $scripts | Select-Object -First 20) {
+    $encodingTest = Test-FileEncoding -FilePath $script.FullName
+    if ($encodingTest.Status -eq "PASS") {
+        $encodingPassCount++
+    }
+    $encodingTestCount++
+    $testResults.Scripts += $encodingTest
+}
+
+Write-Host "File Encoding Tests: $encodingPassCount / $encodingTestCount passed" -ForegroundColor $(if ($encodingPassCount -eq $encodingTestCount) { "Green" } else { "Yellow" })
+
+# Test encoding compliance
+Write-Host "Testing Encoding Compliance..." -ForegroundColor Cyan
+$complianceTestCount = 0
+$compliancePassCount = 0
+foreach ($script in $scripts | Select-Object -First 20) {
+    $complianceTest = Test-EncodingCompliance -FilePath $script.FullName
+    if ($complianceTest.Status -eq "PASS") {
+        $compliancePassCount++
+    }
+    $complianceTestCount++
+    if ($complianceTest.Status -ne "PASS") {
+        Write-TestResult "$($script.Name) - Encoding issues found" "WARN"
+    }
+}
+
+Write-Host "Encoding Compliance Tests: $compliancePassCount / $complianceTestCount passed" -ForegroundColor $(if ($compliancePassCount -eq $complianceTestCount) { "Green" } else { "Yellow" })
+
+
 
 $summaryData = @{
     TotalScripts = $testResults.TotalScripts

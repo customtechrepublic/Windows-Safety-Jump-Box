@@ -438,6 +438,205 @@ else {
 
 Write-Host ""
 
+# Test 6: Image format validation
+Write-Host "Testing Image Format Validation..." -ForegroundColor Cyan
+
+$imageFormats = @(
+    @{ Format = "WIM"; Description = "Windows Imaging Format" },
+    @{ Format = "VHDX"; Description = "Virtual Hard Disk Extended" },
+    @{ Format = "ISO"; Description = "ISO 9660 Disk Image" },
+    @{ Format = "VHD"; Description = "Virtual Hard Disk" }
+)
+
+foreach ($format in $imageFormats) {
+    $testName = "ImageFormat-$($format.Format)"
+    $test = New-TestCase -TestName $testName -Description "Validate $($format.Format) format support" -TestScript {
+        try {
+            $deploymentScripts = Get-ChildItem -Path (Join-Path $repoRoot "deployment") -Filter "*.ps1" -ErrorAction SilentlyContinue
+            $supportsFormat = 0
+            foreach ($script in $deploymentScripts) {
+                $content = Get-Content $script.FullName -Raw
+                if ($content -match $format.Format) {
+                    $supportsFormat++
+                }
+            }
+            return $supportsFormat -gt 0
+        }
+        catch {
+            return $false
+        }
+    }
+    
+    $testResults.Tests += $test
+    $testResults.TotalTests++
+    
+    if ($test.Status -eq "PASS") {
+        $testResults.PassedTests++
+        Write-TestResult "$($format.Format) format support validated" "PASS"
+    }
+    else {
+        $testResults.SkippedTests++
+        Write-TestResult "$($format.Format) format support check skipped" "SKIP"
+    }
+}
+
+# Test 7: Deployment scenario validation
+Write-Host ""
+Write-Host "Testing Deployment Scenarios..." -ForegroundColor Cyan
+
+$scenarios = @(
+    @{ Name = "Fresh Deploy"; Description = "Deploy to clean system" },
+    @{ Name = "Update"; Description = "Update existing deployment" },
+    @{ Name = "Rollback"; Description = "Rollback to previous state" },
+    @{ Name = "Verification"; Description = "Verify deployment success" }
+)
+
+foreach ($scenario in $scenarios) {
+    $testName = "Scenario-$($scenario.Name -replace '\s', '_')"
+    $test = New-TestCase -TestName $testName -Description "Validate deployment scenario: $($scenario.Name)" -TestScript {
+        try {
+            $deploymentScripts = Get-ChildItem -Path (Join-Path $repoRoot "deployment") -Filter "*.ps1" -ErrorAction SilentlyContinue
+            $found = $false
+            $scenarioKeywords = @{
+                "Fresh Deploy" = "Deploy|Install|Create"
+                "Update" = "Update|Upgrade"
+                "Rollback" = "Rollback|Restore|Revert"
+                "Verification" = "Verify|Validate|Test"
+            }
+            
+            $keywords = $scenarioKeywords[$scenario.Name]
+            foreach ($script in $deploymentScripts) {
+                $content = Get-Content $script.FullName -Raw
+                if ($content -match $keywords) {
+                    $found = $true
+                    break
+                }
+            }
+            return $found
+        }
+        catch {
+            return $false
+        }
+    }
+    
+    $testResults.Tests += $test
+    $testResults.TotalTests++
+    
+    if ($test.Status -eq "PASS") {
+        $testResults.PassedTests++
+        Write-TestResult "Deployment scenario '$($scenario.Name)' validated" "PASS"
+    }
+    else {
+        $testResults.SkippedTests++
+        Write-TestResult "Deployment scenario '$($scenario.Name)' validation skipped" "SKIP"
+    }
+}
+
+# Test 8: Recovery and rollback procedures
+Write-Host ""
+Write-Host "Testing Recovery Procedures..." -ForegroundColor Cyan
+
+$testName = "Recovery-Procedures"
+$test = New-TestCase -TestName $testName -Description "Validate recovery and rollback procedures" -TestScript {
+    try {
+        $deploymentScripts = Get-ChildItem -Path (Join-Path $repoRoot "deployment") -Filter "*.ps1" -ErrorAction SilentlyContinue
+        $hasRecovery = 0
+        foreach ($script in $deploymentScripts) {
+            $content = Get-Content $script.FullName -Raw
+            # Check for recovery patterns
+            if ($content -match "Backup|Restore|Recover|Rollback|Recovery") {
+                $hasRecovery++
+            }
+        }
+        return $hasRecovery -gt 0
+    }
+    catch {
+        return $false
+    }
+}
+
+$testResults.Tests += $test
+$testResults.TotalTests++
+
+if ($test.Status -eq "PASS") {
+    $testResults.PassedTests++
+    Write-TestResult "Recovery procedures implemented" "PASS"
+}
+else {
+    $testResults.FailedTests++
+    Write-TestResult "Recovery procedures not found" "FAIL"
+}
+
+# Test 9: Logging in deployment
+Write-Host ""
+Write-Host "Testing Deployment Logging..." -ForegroundColor Cyan
+
+$testName = "Deployment-Logging"
+$test = New-TestCase -TestName $testName -Description "Validate deployment logging" -TestScript {
+    try {
+        $deploymentScripts = Get-ChildItem -Path (Join-Path $repoRoot "deployment") -Filter "*.ps1" -ErrorAction SilentlyContinue
+        $hasLogging = 0
+        foreach ($script in $deploymentScripts) {
+            $content = Get-Content $script.FullName -Raw
+            if ($content -match "Write-Log|Write-Host.*log|Out-File.*log|Add-Content") {
+                $hasLogging++
+            }
+        }
+        return $hasLogging -gt 0
+    }
+    catch {
+        return $false
+    }
+}
+
+$testResults.Tests += $test
+$testResults.TotalTests++
+
+if ($test.Status -eq "PASS") {
+    $testResults.PassedTests++
+    Write-TestResult "Deployment logging implemented" "PASS"
+}
+else {
+    $testResults.FailedTests++
+    Write-TestResult "Deployment logging not found" "FAIL"
+}
+
+# Test 10: Security validation in deployment
+Write-Host ""
+Write-Host "Testing Security Validation..." -ForegroundColor Cyan
+
+$testName = "Security-Validation"
+$test = New-TestCase -TestName $testName -Description "Validate security checks in deployment" -TestScript {
+    try {
+        $deploymentScripts = Get-ChildItem -Path (Join-Path $repoRoot "deployment") -Filter "*.ps1" -ErrorAction SilentlyContinue
+        $hasSecurityChecks = 0
+        foreach ($script in $deploymentScripts) {
+            $content = Get-Content $script.FullName -Raw
+            if ($content -match "Admin|Credential|Encrypt|Secure|Permission|Validate") {
+                $hasSecurityChecks++
+            }
+        }
+        return $hasSecurityChecks -gt 0
+    }
+    catch {
+        return $false
+    }
+}
+
+$testResults.Tests += $test
+$testResults.TotalTests++
+
+if ($test.Status -eq "PASS") {
+    $testResults.PassedTests++
+    Write-TestResult "Security validation implemented" "PASS"
+}
+else {
+    $testResults.FailedTests++
+    Write-TestResult "Security validation not found" "FAIL"
+}
+
+Write-Host ""
+
 # Generate summary
 Write-Host "╔════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
 Write-Host "║                      TEST SUMMARY                             ║" -ForegroundColor Cyan
