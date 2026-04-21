@@ -200,7 +200,7 @@ We are exploring establishing a formal bug bounty program. In the interim:
 ### Expressing Interest
 
 If you're interested in participating in a future bug bounty program, email:
-`security@custompc.local` with subject: `[BUG BOUNTY] Interest in Future Program`
+`security@custompcrepublic.com` with subject: `[BUG BOUNTY] Interest in Future Program`
 
 ---
 
