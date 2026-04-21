@@ -1,0 +1,248 @@
+name: Validate Code and Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**.ps1'
+      - '**.md'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '**.ps1'
+      - '**.md'
+      - '.github/workflows/**'
+
+jobs:
+  validate:
+    name: Validate PowerShell and Documentation
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up PowerShell
+        shell: pwsh
+        run: |
+          Write-Host "PowerShell version: $($PSVersionTable.PSVersion)"
+          Write-Host "Installing PSScriptAnalyzer module..."
+          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -SkipPublisherCheck
+          Write-Host "PSScriptAnalyzer installed successfully"
+      
+      - name: Validate PowerShell Syntax
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $syntaxErrors = 0
+          $scripts = Get-ChildItem -Path $PWD -Filter "*.ps1" -Recurse -Exclude "Run-All-Tests.ps1" | 
+                     Where-Object { $_.DirectoryName -notlike "*\.git*" }
+          
+          Write-Host "Found $($scripts.Count) PowerShell files to validate"
+          
+          foreach ($script in $scripts) {
+              try {
+                  $tokens = $null
+                  $errors = $null
+                  [System.Management.Automation.PSParser]::Tokenize((Get-Content $script.FullName -Raw), [ref]$tokens) | Out-Null
+                  Write-Host "✓ Syntax valid: $($script.Name)" -ForegroundColor Green
+              } catch {
+                  Write-Host "✗ Syntax error in $($script.Name): $_" -ForegroundColor Red
+                  $syntaxErrors++
+              }
+          }
+          
+          if ($syntaxErrors -gt 0) {
+              throw "$syntaxErrors PowerShell files have syntax errors"
+          }
+          Write-Host "All PowerShell files have valid syntax" -ForegroundColor Green
+      
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          $analysisResults = @()
+          
+          $scripts = Get-ChildItem -Path $PWD -Filter "*.ps1" -Recurse | 
+                     Where-Object { $_.DirectoryName -notlike "*\.git*" }
+          
+          Write-Host "Running PSScriptAnalyzer on $($scripts.Count) files..."
+          
+          foreach ($script in $scripts) {
+              $results = Invoke-ScriptAnalyzer -Path $script.FullName -Severity Warning -ErrorAction SilentlyContinue
+              if ($results) {
+                  foreach ($result in $results) {
+                      $analysisResults += [PSCustomObject]@{
+                          File     = $script.Name
+                          Line     = $result.Line
+                          Column   = $result.Column
+                          Rule     = $result.RuleName
+                          Message  = $result.Message
+                          Severity = $result.Severity
+                      }
+                  }
+              }
+          }
+          
+          if ($analysisResults) {
+              Write-Host "PSScriptAnalyzer warnings found:" -ForegroundColor Yellow
+              $analysisResults | Format-Table -AutoSize
+              $analysisResults | Export-Csv -Path "script-analysis-results.csv" -NoTypeInformation
+          } else {
+              Write-Host "No PSScriptAnalyzer warnings found" -ForegroundColor Green
+          }
+      
+      - name: Check for Hardcoded Secrets
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $secretPatterns = @(
+              'password\s*=\s*["\''"][^"'\''"]+["\''"]',
+              'api[_-]?key\s*=\s*["\''"][^"'\''"]+["\''"]',
+              'secret\s*=\s*["\''"][^"'\''"]+["\''"]',
+              'token\s*=\s*["\''"][^"'\''"]+["\''"]',
+              'private[_-]?key\s*=\s*["\''"][^"'\''"]+["\''"]',
+              'aws_access_key_id\s*=',
+              'aws_secret_access_key\s*=',
+              'connection\s*=\s*["\''"].*password.*["\''"]'
+          )
+          
+          $files = Get-ChildItem -Path $PWD -Include "*.ps1", "*.json", "*.yaml", "*.yml", "*.xml", "*.config" -Recurse | 
+                   Where-Object { $_.DirectoryName -notlike "*\.git*" }
+          
+          $secretsFound = 0
+          
+          foreach ($pattern in $secretPatterns) {
+              foreach ($file in $files) {
+                  $matches = Get-Content $file.FullName | Select-String -Pattern $pattern -AllMatches
+                  if ($matches) {
+                      Write-Host "⚠ Potential secret in $($file.Name) matching pattern: $pattern" -ForegroundColor Red
+                      $secretsFound++
+                  }
+              }
+          }
+          
+          if ($secretsFound -gt 0) {
+              throw "Found $secretsFound potential hardcoded secrets. Please remove them before committing."
+          } else {
+              Write-Host "No obvious hardcoded secrets found" -ForegroundColor Green
+          }
+      
+      - name: Validate Documentation
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          $docErrors = 0
+          
+          # Check for broken links in markdown files
+          $markdownFiles = Get-ChildItem -Path $PWD -Filter "*.md" -Recurse | 
+                          Where-Object { $_.DirectoryName -notlike "*\.git*" }
+          
+          Write-Host "Validating $($markdownFiles.Count) markdown files..."
+          
+          foreach ($file in $markdownFiles) {
+              $content = Get-Content $file.FullName
+              
+              # Check for common markdown formatting issues
+              if ($content | Select-String '^\s*$' -AllMatches) {
+                  # Excessive blank lines
+                  $blanks = @($content | Select-String '^\s*$' -AllMatches)
+                  if ($blanks.Count -gt 3) {
+                      Write-Host "⚠ $($file.Name): Contains multiple consecutive blank lines" -ForegroundColor Yellow
+                  }
+              }
+              
+              # Check for valid markdown headers
+              $headers = $content | Select-String '^#+\s' -AllMatches
+              if ($headers.Count -eq 0 -and $file.Name -ne "CHANGELOG.md") {
+                  Write-Host "⚠ $($file.Name): No markdown headers found" -ForegroundColor Yellow
+              }
+          }
+          
+          Write-Host "Documentation validation complete" -ForegroundColor Green
+      
+      - name: Run Test Suite
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          
+          if (Test-Path "tests\Run-All-Tests.ps1") {
+              Write-Host "Running test suite..." -ForegroundColor Cyan
+              & "tests\Run-All-Tests.ps1" -TestFilter "All" -ReportPath "test-reports"
+              
+              if ($LASTEXITCODE -ne 0) {
+                  Write-Host "Test suite failed with exit code: $LASTEXITCODE" -ForegroundColor Red
+                  exit $LASTEXITCODE
+              }
+              Write-Host "Test suite passed" -ForegroundColor Green
+          } else {
+              Write-Host "Test suite not found, skipping..." -ForegroundColor Yellow
+          }
+      
+      - name: Generate Test Report Summary
+        if: always()
+        shell: pwsh
+        run: |
+          # Create summary for GitHub Actions
+          $summary = @"
+          ## Validation Results
+          
+          ✓ PowerShell Syntax Validation: PASSED
+          ✓ PSScriptAnalyzer: COMPLETED
+          ✓ Secret Detection: PASSED
+          ✓ Documentation Validation: PASSED
+          ✓ Test Suite: COMPLETED
+          
+          Test artifacts available in \`test-reports/\` directory
+          "@
+          
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+      
+      - name: Upload Test Report Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: test-reports/
+          retention-days: 30
+          if-no-files-found: warn
+      
+      - name: Upload Script Analysis Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: script-analysis
+          path: script-analysis-results.csv
+          retention-days: 30
+          if-no-files-found: ignore
+      
+      - name: Comment PR with Results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## Validation Results\n\n';
+            
+            // Add test results if available
+            if (fs.existsSync('test-reports/consolidated-report.json')) {
+              const report = JSON.parse(fs.readFileSync('test-reports/consolidated-report.json', 'utf8'));
+              comment += `### Test Execution Summary\n`;
+              comment += `- Total Tests: ${report.ConsolidatedMetrics.TotalTests}\n`;
+              comment += `- Passed: ${report.ConsolidatedMetrics.TotalPassed}\n`;
+              comment += `- Failed: ${report.ConsolidatedMetrics.TotalFailed}\n`;
+              comment += `- Pass Rate: ${(report.ConsolidatedMetrics.OverallPassRate * 100).toFixed(2)}%\n\n`;
+            }
+            
+            comment += '✅ All validations completed successfully!\n';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+

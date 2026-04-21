@@ -1,0 +1,300 @@
+# Custom PC Republic - Windows Safety Jump Box
+# .gitignore - Exclude sensitive, temporary, and build artifacts
+
+# ============================================================================
+# BUILD ARTIFACTS & CACHES
+# ============================================================================
+
+# Packer cache and builds
+packer_cache/
+*.log
+crash.log
+crash.*.log
+
+# Build output (but keep examples and templates)
+output/*
+!output/examples/
+!output/templates/
+
+# ISO files and disk images
+*.iso
+*.img
+*.vhd
+*.vhdx
+*.vmdk
+
+# Windows image format (but we may commit templates)
+*.wim
+install.wim
+
+# ============================================================================
+# SENSITIVE FILES & CREDENTIALS
+# ============================================================================
+
+# Environment files
+.env
+.env.local
+.env.*.local
+env.ps1
+
+# Credential files
+credentials.json
+secrets.json
+*.key
+*.pem
+*.pfx
+*.p12
+*.kdbx
+
+# SSH keys
+id_rsa
+id_rsa.pub
+id_dsa
+id_dsa.pub
+known_hosts
+
+# Azure credentials
+azure_credentials.json
+azureProfile.json
+.azure/
+
+# AWS credentials
+.aws/credentials
+.aws/config
+
+# API keys
+*.apikey
+api_key.txt
+apikeys.json
+
+# Private/confidential documents
+PRIVATE/
+CONFIDENTIAL/
+secrets/
+.secrets/
+
+# ============================================================================
+# VIRTUAL MACHINE & HYPERVISOR
+# ============================================================================
+
+# Hyper-V VM files
+*.vhd
+*.avhd
+*.vhdx
+*.avhdx
+checkpoints/
+*.vsv
+*.vmcx
+
+# VMware files
+*.vmx
+*.vmxf
+*.vmdk
+*.nvram
+*.vmem
+
+# VirtualBox files
+*.vbox
+*.vbox-prev
+*.ova
+
+# KVM/QEMU
+*.qcow2
+*.qcow
+*.img
+
+# Snapshots
+*.snapshot
+snapshots/
+checkpoint-backups/
+
+# ============================================================================
+# TEST & REPORTING
+# ============================================================================
+
+# Test reports (keep structure but ignore output)
+tests/results/
+tests/logs/
+**/test-results/
+**/TestResults/
+*.trx
+
+# Coverage reports
+coverage/
+*.coverage
+htmlcov/
+
+# Compliance reports (temporary/local only)
+compliance-reports/local/
+compliance-reports/*.tmp
+
+# ============================================================================
+# TERRAFORM & INFRASTRUCTURE AS CODE
+# ============================================================================
+
+# Terraform files
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+crash.log
+crash.*.log
+
+# Terraform variable files
+*.tfvars
+*.tfvars.json
+!example.tfvars
+
+# ============================================================================
+# OS & IDE TEMPORARY FILES
+# ============================================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+.directory
+.nfs*
+
+# IDEs
+.vscode/settings.json
+.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+
+# Visual Studio
+.vs/
+bin/
+obj/
+*.user
+*.suo
+
+# Rider
+.idea/
+.idea_modules/
+
+# JetBrains
+.idea/
+*.iml
+
+# ============================================================================
+# NODE.JS & NPM
+# ============================================================================
+
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# ============================================================================
+# PYTHON
+# ============================================================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.tox/
+
+# ============================================================================
+# DOCKER
+# ============================================================================
+
+docker-compose.override.yml
+.dockerignore
+
+# ============================================================================
+# LOGGING & DIAGNOSTIC FILES
+# ============================================================================
+
+# PowerShell logs
+*.ps1xml
+*.log
+logs/
+*.etl
+*.evtx
+
+# Diagnostic data
+diagnostics/
+reports/
+*.dmp
+*.dump
+
+# ============================================================================
+# TEMPORARY BUILD FILES
+# ============================================================================
+
+temp/
+tmp/
+.tmp/
+build-temp/
+scratch/
+
+# Installation temp
+$Recycle.Bin/
+~*
+.~*
+
+# ============================================================================
+# DOCUMENTATION BUILD ARTIFACTS
+# ============================================================================
+
+docs/_build/
+docs/.jekyll-cache/
+site/
+*.pdf.tmp
+.hugo_build.lock
+
+# ============================================================================
+# CUSTOM ARTIFACTS
+# ============================================================================
+
+# Local build artifacts
+local-builds/
+personal-builds/
+
+# Archive backups
+*.bak
+*.backup
+*.old
+archive/
+backups/
+
+# Experimental branches
+experimental/
+poc/
+proof-of-concept/
+
+# ============================================================================
+# SAFETY EXCEPTIONS
+# ============================================================================
+
+# Keep these even if they match above patterns
+!.github/
+!.gitignore
+!docs/GITHUB-SECRETS.md
+!examples/
+!templates/
+
+# EOF

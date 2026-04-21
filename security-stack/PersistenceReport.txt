@@ -1,0 +1,312 @@
+﻿REGISTRY_RUN: HKLM:\Software\Microsoft\Windows\CurrentVersion\Run\SecurityHealth = C:\WINDOWS\system32\SecurityHealthSystray.exe
+REGISTRY_RUN: HKLM:\Software\Microsoft\Windows\CurrentVersion\Run\RtkAudUService = "C:\WINDOWS\System32\DriverStore\FileRepository\realtekservice.inf_amd64_31dd95d009763f70\RtkAudUService64.exe" -background
+REGISTRY_RUN: HKLM:\Software\Microsoft\Windows\CurrentVersion\Run\Corsair iCUE5 Software = "C:\Program Files\Corsair\Corsair iCUE5 Software\iCUE Launcher.exe" --autorun
+REGISTRY_RUN: HKCU:\Software\Microsoft\Windows\CurrentVersion\Run\OneDrive = "C:\Users\loca.WGPC1DJ.000\AppData\Local\Microsoft\OneDrive\OneDrive.exe" /background
+REGISTRY_RUN: HKCU:\Software\Microsoft\Windows\CurrentVersion\Run\Steam = "C:\Program Files (x86)\Steam\steam.exe" -silent
+REGISTRY_RUN: HKCU:\Software\Microsoft\Windows\CurrentVersion\Run\EarnApp = "C:\Program Files (x86)\EarnApp\earnapp.exe" /S
+REGISTRY_RUN: HKCU:\Software\Microsoft\Windows\CurrentVersion\Run\WingetUI = "C:\Users\loca.WGPC1DJ.000\AppData\Local\Programs\UniGetUI\UniGetUI.exe" --daemon
+REGISTRY_RUN: HKCU:\Software\Microsoft\Windows\CurrentVersion\Run\KeePassXC = "C:\Program Files\KeePassXC\KeePassXC.exe"
+REGISTRY_RUN: HKCU:\Software\Microsoft\Windows\CurrentVersion\Run\MicrosoftEdgeAutoLaunch_BB85AEA66DE3E32347767C16B4E46CCD = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --no-startup-window --win-session-start
+REGISTRY_RUN: HKCU:\Software\Microsoft\Windows\CurrentVersion\Run\Discord = "C:\Users\loca.WGPC1DJ.000\AppData\Local\Discord\Update.exe" --processStart Discord.exe
+SCHEDULED_TASK: \MicrosoftEdgeUpdateTaskMachineCore{300E4CA1-5F01-4597-8CAF-97082F9E508D}
+SCHEDULED_TASK: \MicrosoftEdgeUpdateTaskMachineUA{81B086B4-60E9-44D3-8D1B-62E837C59BFF}
+SCHEDULED_TASK: \OneDrive Reporting Task-S-1-5-21-338279068-3629804085-1106988310-1003
+SCHEDULED_TASK: \OneDrive Reporting Task-S-1-5-21-338279068-3629804085-1106988310-1006
+SCHEDULED_TASK: \OneDrive Standalone Update Task-S-1-5-21-338279068-3629804085-1106988310-1003
+SCHEDULED_TASK: \OneDrive Standalone Update Task-S-1-5-21-338279068-3629804085-1106988310-1006
+SCHEDULED_TASK: \OneDrive Startup Task-S-1-5-21-338279068-3629804085-1106988310-1003
+SCHEDULED_TASK: \OneDrive Startup Task-S-1-5-21-338279068-3629804085-1106988310-1006
+SCHEDULED_TASK: \Microsoft\Windows\.NET Framework\.NET Framework NGEN v4.0.30319
+SCHEDULED_TASK: \Microsoft\Windows\.NET Framework\.NET Framework NGEN v4.0.30319 64
+SCHEDULED_TASK: \Microsoft\Windows\AccountHealth\RecoverabilityToastTask
+SCHEDULED_TASK: \Microsoft\Windows\Active Directory Rights Management Services Client\AD RMS Rights Policy Template Management (Manual)
+SCHEDULED_TASK: \Microsoft\Windows\AppID\EDP Policy Manager
+SCHEDULED_TASK: \Microsoft\Windows\AppID\PolicyConverter
+SCHEDULED_TASK: \Microsoft\Windows\AppID\VerifiedPublisherCertStoreCheck
+SCHEDULED_TASK: \Microsoft\Windows\Application Experience\MareBackup
+SCHEDULED_TASK: \Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser Exp
+SCHEDULED_TASK: \Microsoft\Windows\Application Experience\PcaPatchDbTask
+SCHEDULED_TASK: \Microsoft\Windows\Application Experience\SdbinstMergeDbTask
+SCHEDULED_TASK: \Microsoft\Windows\Application Experience\StartupAppTask
+SCHEDULED_TASK: \Microsoft\Windows\ApplicationData\appuriverifierdaily
+SCHEDULED_TASK: \Microsoft\Windows\ApplicationData\appuriverifierinstall
+SCHEDULED_TASK: \Microsoft\Windows\ApplicationData\CleanupTemporaryState
+SCHEDULED_TASK: \Microsoft\Windows\ApplicationData\DsSvcCleanup
+SCHEDULED_TASK: \Microsoft\Windows\AppListBackup\Backup
+SCHEDULED_TASK: \Microsoft\Windows\AppListBackup\BackupNonMaintenance
+SCHEDULED_TASK: \Microsoft\Windows\AppxDeploymentClient\UCPD velocity
+SCHEDULED_TASK: \Microsoft\Windows\Autochk\Proxy
+SCHEDULED_TASK: \Microsoft\Windows\BitLocker\BitLocker Encrypt All Drives
+SCHEDULED_TASK: \Microsoft\Windows\BitLocker\BitLocker MDM policy Refresh
+SCHEDULED_TASK: \Microsoft\Windows\Bluetooth\UninstallDeviceTask
+SCHEDULED_TASK: \Microsoft\Windows\BrokerInfrastructure\BgTaskRegistrationMaintenanceTask
+SCHEDULED_TASK: \Microsoft\Windows\capabilityaccessmanager\maintenancetasks
+SCHEDULED_TASK: \Microsoft\Windows\CertificateServicesClient\AikCertEnrollTask
+SCHEDULED_TASK: \Microsoft\Windows\CertificateServicesClient\CryptoPolicyTask
+SCHEDULED_TASK: \Microsoft\Windows\CertificateServicesClient\KeyPreGenTask
+SCHEDULED_TASK: \Microsoft\Windows\CertificateServicesClient\SystemTask
+SCHEDULED_TASK: \Microsoft\Windows\CertificateServicesClient\UserTask
+SCHEDULED_TASK: \Microsoft\Windows\CertificateServicesClient\UserTask-Roam
+SCHEDULED_TASK: \Microsoft\Windows\Chkdsk\ProactiveScan
+SCHEDULED_TASK: \Microsoft\Windows\Chkdsk\SyspartRepair
+SCHEDULED_TASK: \Microsoft\Windows\CloudExperienceHost\CreateObjectTask
+SCHEDULED_TASK: \Microsoft\Windows\CloudRestore\Backup
+SCHEDULED_TASK: \Microsoft\Windows\CloudRestore\Restore
+SCHEDULED_TASK: \Microsoft\Windows\ConsentUX\UnifiedConsent\UnifiedConsentSyncTask
+SCHEDULED_TASK: \Microsoft\Windows\Containers\CmCleanup
+SCHEDULED_TASK: \Microsoft\Windows\Customer Experience Improvement Program\Consolidator
+SCHEDULED_TASK: \Microsoft\Windows\Customer Experience Improvement Program\UsbCeip
+SCHEDULED_TASK: \Microsoft\Windows\Data Integrity Scan\Data Integrity Check And Scan
+SCHEDULED_TASK: \Microsoft\Windows\Data Integrity Scan\Data Integrity Scan
+SCHEDULED_TASK: \Microsoft\Windows\Data Integrity Scan\Data Integrity Scan for Crash Recovery
+SCHEDULED_TASK: \Microsoft\Windows\Defrag\ScheduledDefrag
+SCHEDULED_TASK: \Microsoft\Windows\Device Information\Device
+SCHEDULED_TASK: \Microsoft\Windows\Device Information\Device User
+SCHEDULED_TASK: \Microsoft\Windows\Device Setup\Metadata Refresh
+SCHEDULED_TASK: \Microsoft\Windows\DeviceDirectoryClient\HandleCommand
+SCHEDULED_TASK: \Microsoft\Windows\DeviceDirectoryClient\HandleWnsCommand
+SCHEDULED_TASK: \Microsoft\Windows\DeviceDirectoryClient\IntegrityCheck
+SCHEDULED_TASK: \Microsoft\Windows\DeviceDirectoryClient\LocateCommandUserSession
+SCHEDULED_TASK: \Microsoft\Windows\DeviceDirectoryClient\RegisterDeviceAccountChange
+SCHEDULED_TASK: \Microsoft\Windows\DeviceDirectoryClient\RegisterDevicePolicyChange
+SCHEDULED_TASK: \Microsoft\Windows\DeviceDirectoryClient\RegisterDeviceProtectionStateChanged
+SCHEDULED_TASK: \Microsoft\Windows\DeviceDirectoryClient\RegisterDeviceSettingChange
+SCHEDULED_TASK: \Microsoft\Windows\DeviceDirectoryClient\RegisterUserDevice
+SCHEDULED_TASK: \Microsoft\Windows\Diagnosis\RecommendedTroubleshootingScanner
+SCHEDULED_TASK: \Microsoft\Windows\Diagnosis\Scheduled
+SCHEDULED_TASK: \Microsoft\Windows\Diagnosis\UnexpectedCodepath
+SCHEDULED_TASK: \Microsoft\Windows\DirectX\DirectXDatabaseUpdater
+SCHEDULED_TASK: \Microsoft\Windows\DirectX\DXGIAdapterCache
+SCHEDULED_TASK: \Microsoft\Windows\DiskCleanup\SilentCleanup
+SCHEDULED_TASK: \Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector
+SCHEDULED_TASK: \Microsoft\Windows\DiskFootprint\Diagnostics
+SCHEDULED_TASK: \Microsoft\Windows\DiskFootprint\StorageSense
+SCHEDULED_TASK: \Microsoft\Windows\DUSM\dusmtask
+SCHEDULED_TASK: \Microsoft\Windows\EDP\EDP App Launch Task
+SCHEDULED_TASK: \Microsoft\Windows\EDP\EDP Auth Task
+SCHEDULED_TASK: \Microsoft\Windows\EDP\EDP Inaccessible Credentials Task
+SCHEDULED_TASK: \Microsoft\Windows\EDP\StorageCardEncryption Task
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\Login Schedule created by enrollment client
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\OS Edition Upgrade event listener created by enrollment client
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\Passport for Work alert created by enrollment client
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\Provisioning initiated session
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\PushLaunch
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\PushRenewal
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\PushUpgrade
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\Refresh schedule created by Declared Configuration to refresh any settings changed on the device
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\Schedule #1 created by enrollment client
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\Schedule #2 created by enrollment client
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\Schedule #3 created by enrollment client
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\Schedule created by enrollment client for renewal of certificate warning
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\Schedule to run OMADMClient by client
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\Schedule to run OMADMClient by server
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\Watchdog schedule created by Declared Configuration to configure device
+SCHEDULED_TASK: \Microsoft\Windows\EnterpriseMgmt\32AE6D70-A2DD-4EB9-9F1D-14CBF3C9AD45\Win10 S Mode event listener created by enrollment client
+SCHEDULED_TASK: \Microsoft\Windows\ExploitGuard\ExploitGuard MDM policy Refresh
+SCHEDULED_TASK: \Microsoft\Windows\Feedback\Siuf\DmClient
+SCHEDULED_TASK: \Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload
+SCHEDULED_TASK: \Microsoft\Windows\FileHistory\File History (maintenance mode)
+SCHEDULED_TASK: \Microsoft\Windows\Flighting\FeatureConfig\GovernedFeatureUsageProcessing
+SCHEDULED_TASK: \Microsoft\Windows\Flighting\FeatureConfig\ReconcileConfigs
+SCHEDULED_TASK: \Microsoft\Windows\Flighting\FeatureConfig\ReconcileFeatures
+SCHEDULED_TASK: \Microsoft\Windows\Flighting\FeatureConfig\UsageDataFlushing
+SCHEDULED_TASK: \Microsoft\Windows\Flighting\FeatureConfig\UsageDataReceiver
+SCHEDULED_TASK: \Microsoft\Windows\Flighting\FeatureConfig\UsageDataReporting
+SCHEDULED_TASK: \Microsoft\Windows\Flighting\OneSettings\RefreshCache
+SCHEDULED_TASK: \Microsoft\Windows\Hotpatch\Monitoring
+SCHEDULED_TASK: \Microsoft\Windows\input\InputSettingsRestoreDataAvailable
+SCHEDULED_TASK: \Microsoft\Windows\input\LocalUserSyncDataAvailable
+SCHEDULED_TASK: \Microsoft\Windows\input\MouseSyncDataAvailable
+SCHEDULED_TASK: \Microsoft\Windows\input\PenSyncDataAvailable
+SCHEDULED_TASK: \Microsoft\Windows\input\RemoteMouseSyncDataAvailable
+SCHEDULED_TASK: \Microsoft\Windows\input\RemotePenSyncDataAvailable
+SCHEDULED_TASK: \Microsoft\Windows\input\RemoteTouchpadSyncDataAvailable
+SCHEDULED_TASK: \Microsoft\Windows\input\syncpensettings
+SCHEDULED_TASK: \Microsoft\Windows\input\TouchpadSyncDataAvailable
+SCHEDULED_TASK: \Microsoft\Windows\InstallService\RestoreDevice
+SCHEDULED_TASK: \Microsoft\Windows\InstallService\ScanForUpdates
+SCHEDULED_TASK: \Microsoft\Windows\InstallService\ScanForUpdatesAsUser
+SCHEDULED_TASK: \Microsoft\Windows\InstallService\SmartRetry
+SCHEDULED_TASK: \Microsoft\Windows\International\Synchronize Language Settings
+SCHEDULED_TASK: \Microsoft\Windows\Kernel\La57Cleanup
+SCHEDULED_TASK: \Microsoft\Windows\LanguageComponentsInstaller\Installation
+SCHEDULED_TASK: \Microsoft\Windows\LanguageComponentsInstaller\ReconcileLanguageResources
+SCHEDULED_TASK: \Microsoft\Windows\License Manager\TempSignedLicenseExchange
+SCHEDULED_TASK: \Microsoft\Windows\Location\WindowsActionDialog
+SCHEDULED_TASK: \Microsoft\Windows\Maintenance\WinSAT
+SCHEDULED_TASK: \Microsoft\Windows\Management\Provisioning\Cellular
+SCHEDULED_TASK: \Microsoft\Windows\Management\Provisioning\Logon
+SCHEDULED_TASK: \Microsoft\Windows\Maps\MapsToastTask
+SCHEDULED_TASK: \Microsoft\Windows\MemoryDiagnostic\AutomaticOfflineMemoryDiagnostic
+SCHEDULED_TASK: \Microsoft\Windows\MemoryDiagnostic\ProcessMemoryDiagnosticEvents
+SCHEDULED_TASK: \Microsoft\Windows\MUI\LPRemove
+SCHEDULED_TASK: \Microsoft\Windows\Multimedia\SystemSoundsService
+SCHEDULED_TASK: \Microsoft\Windows\Network Connectivity Status Indicator\NcsiIdentifyUserProxies
+SCHEDULED_TASK: \Microsoft\Windows\NlaSvc\WiFiTask
+SCHEDULED_TASK: \Microsoft\Windows\PCRPF\PCR Prediction Framework Firmware Update Task
+SCHEDULED_TASK: \Microsoft\Windows\PerformanceTrace\RequestTrace
+SCHEDULED_TASK: \Microsoft\Windows\PerformanceTrace\WhesvcToast
+SCHEDULED_TASK: \Microsoft\Windows\PI\Secure-Boot-Update
+SCHEDULED_TASK: \Microsoft\Windows\PI\Sqm-Tasks
+SCHEDULED_TASK: \Microsoft\Windows\Plug and Play\Device Install Group Policy
+SCHEDULED_TASK: \Microsoft\Windows\Plug and Play\Device Install Reboot Required
+SCHEDULED_TASK: \Microsoft\Windows\Plug and Play\Sysprep Generalize Drivers
+SCHEDULED_TASK: \Microsoft\Windows\Pluton\Pluton-Ksp-Provisioning
+SCHEDULED_TASK: \Microsoft\Windows\Power Efficiency Diagnostics\AnalyzeSystem
+SCHEDULED_TASK: \Microsoft\Windows\Printing\EduPrintProv
+SCHEDULED_TASK: \Microsoft\Windows\Printing\PrinterCleanupTask
+SCHEDULED_TASK: \Microsoft\Windows\Printing\PrintJobCleanupTask
+SCHEDULED_TASK: \Microsoft\Windows\PushToInstall\LoginCheck
+SCHEDULED_TASK: \Microsoft\Windows\PushToInstall\Registration
+SCHEDULED_TASK: \Microsoft\Windows\Ras\MobilityManager
+SCHEDULED_TASK: \Microsoft\Windows\RecoveryEnvironment\VerifyWinRE
+SCHEDULED_TASK: \Microsoft\Windows\ReFsDedupSvc\Initialization
+SCHEDULED_TASK: \Microsoft\Windows\Registry\RegIdleBackup
+SCHEDULED_TASK: \Microsoft\Windows\RemoteAssistance\RemoteAssistanceTask
+SCHEDULED_TASK: \Microsoft\Windows\Servicing\StartComponentCleanup
+SCHEDULED_TASK: \Microsoft\Windows\Setup\PITRTask
+SCHEDULED_TASK: \Microsoft\Windows\Setup\SetupRecoveryDataTask
+SCHEDULED_TASK: \Microsoft\Windows\Shell\CreateObjectTask
+SCHEDULED_TASK: \Microsoft\Windows\Shell\FamilySafetyMonitor
+SCHEDULED_TASK: \Microsoft\Windows\Shell\FamilySafetyRefreshTask
+SCHEDULED_TASK: \Microsoft\Windows\Shell\IndexerAutomaticMaintenance
+SCHEDULED_TASK: \Microsoft\Windows\Shell\ThemesSyncedImageDownload
+SCHEDULED_TASK: \Microsoft\Windows\Shell\UpdateUserPictureTask
+SCHEDULED_TASK: \Microsoft\Windows\Shell\UpdateUserPictureTaskContained
+SCHEDULED_TASK: \Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTask
+SCHEDULED_TASK: \Microsoft\Windows\SpacePort\SpaceAgentTask
+SCHEDULED_TASK: \Microsoft\Windows\SpacePort\SpaceManagerTask
+SCHEDULED_TASK: \Microsoft\Windows\Speech\SpeechModelDownloadTask
+SCHEDULED_TASK: \Microsoft\Windows\StateRepository\MaintenanceTasks
+SCHEDULED_TASK: \Microsoft\Windows\Storage Tiers Management\Storage Tiers Management Initialization
+SCHEDULED_TASK: \Microsoft\Windows\Subscription\EnableLicenseAcquisition
+SCHEDULED_TASK: \Microsoft\Windows\Sustainability\PowerGridForecastTask
+SCHEDULED_TASK: \Microsoft\Windows\Sustainability\SustainabilityTelemetry
+SCHEDULED_TASK: \Microsoft\Windows\Sysmain\ResPriStaticDbSync
+SCHEDULED_TASK: \Microsoft\Windows\Sysmain\WsSwapAssessmentTask
+SCHEDULED_TASK: \Microsoft\Windows\SystemRestore\SR
+SCHEDULED_TASK: \Microsoft\Windows\Task Manager\Interactive
+SCHEDULED_TASK: \Microsoft\Windows\TextServicesFramework\MsCtfMonitor
+SCHEDULED_TASK: \Microsoft\Windows\Time Synchronization\ForceSynchronizeTime
+SCHEDULED_TASK: \Microsoft\Windows\Time Synchronization\SynchronizeTime
+SCHEDULED_TASK: \Microsoft\Windows\Time Zone\SynchronizeTimeZone
+SCHEDULED_TASK: \Microsoft\Windows\TPM\Tpm-HASCertRetr
+SCHEDULED_TASK: \Microsoft\Windows\TPM\Tpm-Maintenance
+SCHEDULED_TASK: \Microsoft\Windows\TPM\Tpm-PreAttestationHealthCheck
+SCHEDULED_TASK: \Microsoft\Windows\UpdateOrchestrator\Report policies
+SCHEDULED_TASK: \Microsoft\Windows\UpdateOrchestrator\Schedule Scan
+SCHEDULED_TASK: \Microsoft\Windows\UpdateOrchestrator\Schedule Scan Static Task
+SCHEDULED_TASK: \Microsoft\Windows\UpdateOrchestrator\Start Oobe Expedite Work
+SCHEDULED_TASK: \Microsoft\Windows\UpdateOrchestrator\StartOobeAppsScanAfterUpdate
+SCHEDULED_TASK: \Microsoft\Windows\UpdateOrchestrator\StartOobeAppsScan_LicenseAccepted
+SCHEDULED_TASK: \Microsoft\Windows\UpdateOrchestrator\UIEOrchestrator
+SCHEDULED_TASK: \Microsoft\Windows\UpdateOrchestrator\USO_UxBroker
+SCHEDULED_TASK: \Microsoft\Windows\UpdateOrchestrator\UUS Failover Task
+SCHEDULED_TASK: \Microsoft\Windows\UPnP\UPnPHostConfig
+SCHEDULED_TASK: \Microsoft\Windows\UsageAndQualityInsights\UsageAndQualityInsights-MaintenanceTask
+SCHEDULED_TASK: \Microsoft\Windows\USB\Usb-Notifications
+SCHEDULED_TASK: \Microsoft\Windows\WaaSMedic\PerformRemediation
+SCHEDULED_TASK: \Microsoft\Windows\WCM\WiFiTask
+SCHEDULED_TASK: \Microsoft\Windows\WDI\ResolutionHost
+SCHEDULED_TASK: \Microsoft\Windows\Windows Defender\Windows Defender Cache Maintenance
+SCHEDULED_TASK: \Microsoft\Windows\Windows Defender\Windows Defender Cleanup
+SCHEDULED_TASK: \Microsoft\Windows\Windows Defender\Windows Defender Scheduled Scan
+SCHEDULED_TASK: \Microsoft\Windows\Windows Defender\Windows Defender Verification
+SCHEDULED_TASK: \Microsoft\Windows\Windows Error Reporting\QueueReporting
+SCHEDULED_TASK: \Microsoft\Windows\Windows Filtering Platform\BfeOnServiceStartTypeChange
+SCHEDULED_TASK: \Microsoft\Windows\WindowsAI\Recall\PolicyConfiguration
+SCHEDULED_TASK: \Microsoft\Windows\WindowsAI\Settings\InitialConfiguration
+SCHEDULED_TASK: \Microsoft\Windows\WindowsColorSystem\Calibration Loader
+SCHEDULED_TASK: \Microsoft\Windows\WindowsUpdate\Refresh Group Policy Cache
+SCHEDULED_TASK: \Microsoft\Windows\WindowsUpdate\Scheduled Start
+SCHEDULED_TASK: \Microsoft\Windows\Wininet\CacheTask
+SCHEDULED_TASK: \Microsoft\Windows\WlanSvc\CDSSync
+SCHEDULED_TASK: \Microsoft\Windows\WlanSvc\MoProfileManagement
+SCHEDULED_TASK: \Microsoft\Windows\WOF\WIM-Hash-Management
+SCHEDULED_TASK: \Microsoft\Windows\WwanSvc\NotificationTask
+SCHEDULED_TASK: \Microsoft\Windows\WwanSvc\OobeDiscovery
+SCHEDULED_TASK: \Microsoft\XblGameSave\XblGameSaveTask
+SCHEDULED_TASK: \SoftLanding\S-1-5-21-338279068-3629804085-1106988310-1003\SoftLandingCreativeManagementTask
+SCHEDULED_TASK: \SoftLanding\S-1-5-21-338279068-3629804085-1106988310-1003\SoftLandingDeferralTask-{63b9094d-f383-4127-8aed-ac962b536ffe}
+SCHEDULED_TASK: \SoftLanding\S-1-5-21-338279068-3629804085-1106988310-1006\SoftLandingCreativeManagementTask
+SERVICE: AESMService - Path: C:\WINDOWS\System32\DriverStore\FileRepository\sgx_psw.inf_amd64_ece153ca769ec179\aesm_service.exe
+SERVICE: AMD Crash Defender Service - Path: C:\WINDOWS\System32\DriverStore\FileRepository\amdfendr.inf_amd64_56c8536a80b5c1bd\amdfendrsr.exe
+SERVICE: AMD External Events Utility - Path: C:\WINDOWS\System32\DriverStore\FileRepository\u0197843.inf_amd64_82ec9e2b79afe28f\B025592\atiesrxx.exe
+SERVICE: AudioEndpointBuilder - Path: C:\WINDOWS\System32\svchost.exe -k LocalSystemNetworkRestricted -p
+SERVICE: Audiosrv - Path: C:\WINDOWS\System32\svchost.exe -k LocalServiceNetworkRestricted -p
+SERVICE: BFE - Path: C:\WINDOWS\system32\svchost.exe -k LocalServiceNoNetworkFirewall -p
+SERVICE: BrokerInfrastructure - Path: C:\WINDOWS\system32\svchost.exe -k DcomLaunch -p
+SERVICE: camsvc - Path: C:\WINDOWS\system32\svchost.exe -k osprivacy -p
+SERVICE: cbdhsvc_9726d - Path: C:\WINDOWS\system32\svchost.exe -k ClipboardSvcGroup -p
+SERVICE: CDPSvc - Path: C:\WINDOWS\system32\svchost.exe -k LocalService -p
+SERVICE: CDPUserSvc_9726d - Path: C:\WINDOWS\system32\svchost.exe -k UnistackSvcGroup
+SERVICE: CmService - Path: C:\WINDOWS\system32\svchost.exe -k LocalSystemNetworkRestricted
+SERVICE: CoreMessagingRegistrar - Path: C:\WINDOWS\system32\svchost.exe -k LocalServiceNoNetwork -p
+SERVICE: CorsairGamingAudioConfig - Path: C:\Windows\System32\CorsairGamingAudioCfgService64.exe
+SERVICE: CorsairService - Path: "C:\Program Files\Corsair\Corsair iCUE5 Software\clink\Corsair.Service.exe"
+SERVICE: CryptSvc - Path: C:\WINDOWS\system32\svchost.exe -k NetworkService -p
+SERVICE: CscService - Path: C:\WINDOWS\System32\svchost.exe -k LocalSystemNetworkRestricted -p
+SERVICE: DcomLaunch - Path: C:\WINDOWS\system32\svchost.exe -k DcomLaunch -p
+SERVICE: Dhcp - Path: C:\WINDOWS\system32\svchost.exe -k LocalServiceNetworkRestricted -p
+SERVICE: DiagTrack - Path: C:\WINDOWS\System32\svchost.exe -k utcsvc -p
+SERVICE: DispBrokerDesktopSvc - Path: C:\WINDOWS\system32\svchost.exe -k LocalService -p
+SERVICE: Dnscache - Path: C:\WINDOWS\system32\svchost.exe -k NetworkService -p
+SERVICE: DPS - Path: C:\WINDOWS\System32\svchost.exe -k LocalServiceNoNetwork -p
+SERVICE: DusmSvc - Path: C:\WINDOWS\System32\svchost.exe -k LocalServiceNetworkRestricted -p -s DusmSvc
+SERVICE: EventLog - Path: C:\WINDOWS\System32\svchost.exe -k LocalServiceNetworkRestricted -p
+SERVICE: EventSystem - Path: C:\WINDOWS\system32\svchost.exe -k LocalServiceRedirectionGuard -p
+SERVICE: FontCache - Path: C:\WINDOWS\system32\svchost.exe -k LocalService -p
+SERVICE: IKEEXT - Path: C:\WINDOWS\system32\svchost.exe -k netsvcs -p
+SERVICE: InventorySvc - Path: C:\WINDOWS\system32\svchost.exe -k InvSvcGroup -p
+SERVICE: iphlpsvc - Path: C:\WINDOWS\System32\svchost.exe -k NetSvcs -p
+SERVICE: jhi_service - Path: C:\WINDOWS\System32\DriverStore\FileRepository\dal.inf_amd64_af50fdb80983f7bc\jhi_service.exe
+SERVICE: LanmanServer - Path: C:\WINDOWS\system32\svchost.exe -k netsvcs -p
+SERVICE: LanmanWorkstation - Path: C:\WINDOWS\System32\svchost.exe -k NetworkService -p
+SERVICE: LSM - Path: C:\WINDOWS\system32\svchost.exe -k DcomLaunch -p
+SERVICE: MDCoreSvc - Path: "C:\ProgramData\Microsoft\Windows Defender\Platform\4.18.26030.3011-0\MpDefenderCoreService.exe"
+SERVICE: mpssvc - Path: C:\WINDOWS\system32\svchost.exe -k LocalServiceNoNetworkFirewall -p
+SERVICE: NahimicService - Path: "C:\WINDOWS\system32\NahimicService.exe"
+SERVICE: nsi - Path: C:\WINDOWS\system32\svchost.exe -k LocalService -p
+SERVICE: OneSyncSvc_9726d - Path: C:\WINDOWS\system32\svchost.exe -k UnistackSvcGroup
+SERVICE: PcaSvc - Path: C:\WINDOWS\system32\svchost.exe -k LocalSystemNetworkRestricted -p
+SERVICE: Power - Path: C:\WINDOWS\system32\svchost.exe -k DcomLaunch -p
+SERVICE: ProfSvc - Path: C:\WINDOWS\system32\svchost.exe -k UserProfileService -p
+SERVICE: RpcEptMapper - Path: C:\WINDOWS\system32\svchost.exe -k RPCSS -p
+SERVICE: RpcSs - Path: C:\WINDOWS\system32\svchost.exe -k rpcss -p
+SERVICE: RtkAudioUniversalService - Path: C:\WINDOWS\System32\DriverStore\FileRepository\realtekservice.inf_amd64_31dd95d009763f70\RtkAudUService64.exe
+SERVICE: SamSs - Path: C:\WINDOWS\system32\lsass.exe
+SERVICE: SamsungQuickShareService - Path: "C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungQuickShare_2.3.22.0_x64__wyx1vj98g3asy\QuickShareService\QuickShareService.exe"
+SERVICE: Schedule - Path: C:\WINDOWS\system32\svchost.exe -k netsvcs -p
+SERVICE: SENS - Path: C:\WINDOWS\system32\svchost.exe -k netsvcsRedirectionGuard -p
+SERVICE: ShellHWDetection - Path: C:\WINDOWS\System32\svchost.exe -k netsvcs -p
+SERVICE: Spooler - Path: C:\WINDOWS\System32\spoolsv.exe
+SERVICE: StateRepository - Path: C:\WINDOWS\system32\svchost.exe -k appmodel -p
+SERVICE: StorSvc - Path: C:\WINDOWS\System32\svchost.exe -k LocalSystemNetworkRestricted -p
+SERVICE: SysMain - Path: C:\WINDOWS\system32\svchost.exe -k LocalSystemNetworkRestricted -p
+SERVICE: SystemEventsBroker - Path: C:\WINDOWS\system32\svchost.exe -k DcomLaunch -p
+SERVICE: Tailscale - Path: "C:\Program Files\Tailscale\tailscaled.exe"
+SERVICE: TextInputManagementService - Path: C:\WINDOWS\System32\svchost.exe -k LocalSystemNetworkRestricted -p
+SERVICE: Themes - Path: C:\WINDOWS\System32\svchost.exe -k netsvcs -p
+SERVICE: TrkWks - Path: C:\WINDOWS\System32\svchost.exe -k LocalSystemNetworkRestricted -p
+SERVICE: UserManager - Path: C:\WINDOWS\system32\svchost.exe -k netsvcs -p
+SERVICE: UsoSvc - Path: C:\WINDOWS\system32\svchost.exe -k netsvcs -p
+SERVICE: W32Time - Path: C:\WINDOWS\system32\svchost.exe -k LocalService
+SERVICE: Wcmsvc - Path: C:\WINDOWS\system32\svchost.exe -k LocalServiceNetworkRestricted -p -s Wcmsvc
+SERVICE: webthreatdefusersvc_9726d - Path: C:\WINDOWS\system32\svchost.exe -k LocalSystemNetworkRestricted -p
+SERVICE: whesvc - Path: C:\WINDOWS\system32\svchost.exe -k whesvc -p
+SERVICE: WinDefend - Path: "C:\ProgramData\Microsoft\Windows Defender\Platform\4.18.26030.3011-0\MsMpEng.exe"
+SERVICE: Winmgmt - Path: C:\WINDOWS\system32\svchost.exe -k netsvcs -p
+SERVICE: WMIRegistrationService - Path: C:\WINDOWS\System32\DriverStore\FileRepository\mewmiprov.inf_amd64_d51901c26227fb29\WMIRegistrationService.exe
+SERVICE: WpnService - Path: C:\WINDOWS\system32\svchost.exe -k netsvcs -p
+SERVICE: WpnUserService_9726d - Path: C:\WINDOWS\system32\svchost.exe -k UnistackSvcGroup
+SERVICE: WSAIFabricSvc - Path: C:\WINDOWS\system32\svchost.exe -k WSAIFabricSvcGroup -p
+SERVICE: wscsvc - Path: C:\WINDOWS\System32\svchost.exe -k LocalServiceNetworkRestricted -p
+SERVICE: WSearch - Path: C:\WINDOWS\system32\SearchIndexer.exe /Embedding
+EDGE_EXTENSION: cgjgjfacjflmgphhhepmbhhbgjieaecn
+EDGE_EXTENSION: ghbmnnjooekpmoecnnnilnnbdlolhkhi
+EDGE_EXTENSION: jmjflgjpcpepeafmmgdpfkogkghcpiha
+EDGE_EXTENSION: kfbdpdaobnofkbopebjglnaadopfikhh
+EDGE_EXTENSION: oakginmjipboeflcgnbipnjojnpchnpd
+STARTUP_FOLDER: C:\Users\loca.WGPC1DJ.000\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\Ollama.lnk
+STARTUP_FOLDER: C:\Users\loca.WGPC1DJ.000\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\TikTok.lnk
+STARTUP_FOLDER: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Tailscale.lnk

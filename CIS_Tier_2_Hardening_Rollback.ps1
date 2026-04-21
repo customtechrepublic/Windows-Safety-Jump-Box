@@ -5,12 +5,12 @@
 # Restore default settings for Windows features and services
 
 # Disable unnecessary services
-Stop-Service -Name "ServiceName" -Force # Replace with actual service names
-Set-Service -Name "ServiceName" -StartupType "Manual" # Replace with actual service names
+Stop-Service -Name "W32Time" -Force
+Set-Service -Name "W32Time" -StartupType "Manual"
 
 # Reset security policies to defaults
 # Example: Reset policy for Windows Defender
-Set-MpPreference -DisableRealtimeMonitoring $false
+Set-MpPreference -EnableRealtimeMonitoring $true
 
 # Restore default firewall settings
 Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
@@ -20,7 +20,8 @@ Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies
 
 # Complete other necessary settings to revert changes
 # Example: Reset password policy
-Set-LocalUser -Name "UserName" -Password (ConvertTo-SecureString "NewPassword" -AsPlainText -Force) # Ensure to manage user securely
+$securePassword = Read-Host "Enter new password for Administrator" -AsSecureString
+Set-LocalUser -Name "Administrator" -Password $securePassword # Ensure to manage user securely
 
 # Log the rollback process
 Write-Output "CIS Tier 2 hardening changes have been successfully reverted on $(Get-Date)."

@@ -1,0 +1,244 @@
+# GitHub Actions Workflow Configuration
+# Centralized configuration for all CI/CD workflows
+
+# Workflow Triggers and Schedules
+triggers:
+  validate:
+    on_push_branches: [main, develop]
+    on_push_paths: ["**.ps1", "**.md", ".github/workflows/**"]
+    on_pr_branches: [main, develop]
+    on_pr_paths: ["**.ps1", "**.md", ".github/workflows/**"]
+  
+  build_windows_11:
+    schedule: "0 2 * * 0"  # Weekly Sunday 2 AM UTC
+    allow_manual: true
+  
+  build_server_2022:
+    schedule: "0 3 * * 0"  # Weekly Sunday 3 AM UTC
+    allow_manual: true
+  
+  security_audit:
+    schedule: "0 1 * * *"  # Nightly 1 AM UTC
+    allow_manual: true
+    on_pr: true
+  
+  publish_release:
+    allow_manual: true
+  
+  deploy_test:
+    allow_manual: true
+
+# Runner Configuration
+runners:
+  build_image:
+    - windows-latest  # Primary builder
+    - windows-2022    # Alternative builder
+  
+  validate:
+    - windows-latest  # PowerShell validation
+  
+  security:
+    - windows-latest  # Security scanning
+  
+  deploy_test:
+    - windows-latest  # Test deployment
+
+# Build Parameters
+build:
+  windows_11:
+    os: "Windows 11"
+    editions: ["Pro", "Enterprise"]
+    architectures: ["x64"]
+    languages: ["en-US"]
+    cis_level: 2
+    hardening:
+      defender: true
+      firewall: true
+      bitlocker: true
+      appLocker: true
+      uac: true
+  
+  server_2022:
+    os: "Windows Server 2022"
+    editions: ["Standard", "Datacenter"]
+    architectures: ["x64"]
+    languages: ["en-US"]
+    cis_level: 2
+    hypervisor_variants:
+      - hyper-v
+      - vmware
+      - virtualbox
+    hardening:
+      defender: true
+      firewall: true
+      bitlocker: true
+      appLocker: true
+
+# ISO Sources (placeholder - configure with actual sources)
+iso_sources:
+  windows_11:
+    url: "https://software-download.microsoft.com/download/pr/Windows11_InsiderPreview_Client_x64_en-us_22000.iso"
+    sha256: ""  # Set actual hash
+  
+  server_2022:
+    url: "https://software-download.microsoft.com/download/pr/SERVER_EVAL_x64FRE_en-us.iso"
+    sha256: ""  # Set actual hash
+
+# Artifact Retention Policies
+artifact_retention:
+  test_reports: 30  # days
+  build_artifacts: 90  # days
+  release_artifacts: 180  # days
+  security_reports: 30  # days
+  compliance_reports: 90  # days
+
+# Caching Strategy
+caching:
+  packer:
+    enabled: true
+    key_pattern: "packer-${{ runner.os }}-${{ hashFiles('.github/workflows/build-*.yml') }}"
+    restore_keys:
+      - "packer-${{ runner.os }}-"
+  
+  build_tools:
+    enabled: true
+    key_pattern: "build-tools-${{ runner.os }}"
+    restore_keys:
+      - "build-tools-"
+
+# Test Configuration
+testing:
+  run_on_pr: true
+  run_on_push: true
+  test_suites:
+    - name: "PowerShell Syntax"
+      enabled: true
+      timeout: 5
+    - name: "CIS Compliance"
+      enabled: true
+      timeout: 15
+    - name: "Deployment Scripts"
+      enabled: true
+      timeout: 10
+    - name: "Integration"
+      enabled: true
+      timeout: 20
+
+# Security Configuration
+security:
+  psscriptanalyzer:
+    enabled: true
+    severity_levels: ["Error", "Warning"]
+    rules_to_exclude: []
+  
+  credential_scanning:
+    enabled: true
+    scan_history: true
+    ignore_patterns: []
+  
+  sast:
+    enabled: true
+    patterns:
+      - "UseOfEval"
+      - "UnencryptedPassword"
+      - "WeakCryptography"
+      - "SQLInjection"
+      - "PathTraversal"
+
+# Notification Configuration
+notifications:
+  slack:
+    enabled: false
+    webhook_secret: "SLACK_WEBHOOK_URL"
+    channels:
+      on_success: "#builds"
+      on_failure: "#alerts"
+  
+  teams:
+    enabled: false
+    webhook_secret: "TEAMS_WEBHOOK_URL"
+  
+  email:
+    enabled: false
+    recipients: []
+
+# Release Configuration
+release:
+  auto_increment_version: true
+  version_format: "v{major}.{minor}.{patch}"
+  create_compliance_report: true
+  create_deployment_guide: true
+  tag_format: "{os}-{version}"
+
+# Secrets Management
+# NOTE: These are placeholder keys. Configure actual secrets in GitHub repository settings.
+secrets:
+  - name: AZURE_CREDENTIALS
+    description: "Azure Service Principal credentials for deployment"
+    required: false
+  
+  - name: AZURE_SUBSCRIPTION_ID
+    description: "Azure Subscription ID"
+    required: false
+  
+  - name: SLACK_WEBHOOK_URL
+    description: "Slack webhook for notifications"
+    required: false
+  
+  - name: TEAMS_WEBHOOK_URL
+    description: "Teams webhook for notifications"
+    required: false
+  
+  - name: REGISTRY_USERNAME
+    description: "Container registry username"
+    required: false
+  
+  - name: REGISTRY_PASSWORD
+    description: "Container registry password"
+    required: false
+
+# Compliance and Audit
+compliance:
+  enable_audit_logging: true
+  audit_retention_days: 365
+  log_failed_tests: true
+  require_passing_tests_for_merge: true
+  require_security_review: false
+
+# Performance Settings
+performance:
+  max_parallel_builds: 2
+  max_parallel_tests: 3
+  build_timeout_minutes: 360
+  test_timeout_minutes: 60
+  cleanup_timeout_minutes: 30
+
+# Output Directories
+output_paths:
+  build_artifacts: "output/"
+  test_reports: "test-reports/"
+  build_reports: "build-reports/"
+  security_reports: "security-reports/"
+  compliance_reports: "compliance-reports/"
+
+# Artifact Output Formats
+artifact_formats:
+  images:
+    - wim      # Windows Imaging Format
+    - vhdx     # Virtual Hard Disk
+    - iso      # ISO image
+    - vhd      # Legacy VHD format
+  
+  reports:
+    - json     # Machine-readable
+    - html     # Web viewable
+    - csv      # Spreadsheet compatible
+    - sarif    # Security Analysis Results
+
+# Documentation
+documentation:
+  readme_file: "README.md"
+  workflows_doc: ".github/WORKFLOWS.md"
+  deployment_guide: ".github/DEPLOYMENT.md"
+  troubleshooting: ".github/TROUBLESHOOTING.md"
+

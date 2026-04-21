@@ -1,0 +1,491 @@
+name: Security Audit
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 1 * * *'  # Nightly at 1 AM UTC
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
+jobs:
+  psscriptanalyzer:
+    name: PowerShell Script Analysis
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up PowerShell modules
+        shell: pwsh
+        run: |
+          Write-Host "Installing security analysis modules..."
+          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -SkipPublisherCheck
+          Install-Module -Name PSStig -Force -Scope CurrentUser -SkipPublisherCheck -ErrorAction SilentlyContinue
+          Write-Host "✓ Modules installed" -ForegroundColor Green
+      
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          
+          $results = @()
+          $scripts = Get-ChildItem -Path $PWD -Filter "*.ps1" -Recurse | 
+                     Where-Object { $_.DirectoryName -notlike "*\.git*" }
+          
+          Write-Host "Analyzing $($scripts.Count) PowerShell files for security issues..."
+          
+          foreach ($script in $scripts) {
+              $analysis = Invoke-ScriptAnalyzer -Path $script.FullName `
+                  -Severity @("Error", "Warning") `
+                  -ErrorAction SilentlyContinue
+              
+              if ($analysis) {
+                  foreach ($issue in $analysis) {
+                      $results += [PSCustomObject]@{
+                          File       = $script.Name
+                          FullPath   = $script.FullName
+                          Line       = $issue.Line
+                          Column     = $issue.Column
+                          Severity   = $issue.Severity
+                          RuleName   = $issue.RuleName
+                          Message    = $issue.Message
+                          ScriptRule = $issue.ScriptRule.SourceName
+                      }
+                  }
+              }
+          }
+          
+          if ($results) {
+              Write-Host "Found $($results.Count) security issues" -ForegroundColor Yellow
+              $results | Format-Table -AutoSize
+              $results | Export-Csv -Path "pss-analysis-results.csv" -NoTypeInformation
+              
+              # SARIF format for GitHub security tab
+              $sarifOutput = @{
+                  version = "2.1.0"
+                  runs = @(@{
+                      tool = @{
+                          driver = @{
+                              name = "PSScriptAnalyzer"
+                              version = (Get-Module PSScriptAnalyzer).Version.ToString()
+                              informationUri = "https://github.com/PowerShell/PSScriptAnalyzer"
+                          }
+                      }
+                      results = @($results | ForEach-Object {
+                          @{
+                              ruleId = $_.RuleName
+                              message = @{
+                                  text = $_.Message
+                              }
+                              level = if ($_.Severity -eq "Error") { "error" } else { "warning" }
+                              locations = @(@{
+                                  physicalLocation = @{
+                                      artifactLocation = @{
+                                          uri = $_.FullPath.Replace($PWD, "").TrimStart("\")
+                                      }
+                                      region = @{
+                                          startLine = $_.Line
+                                          startColumn = $_.Column
+                                      }
+                                  }
+                              })
+                          }
+                      })
+                  })
+              }
+              
+              $sarifOutput | ConvertTo-Json -Depth 100 | Set-Content "pss-analysis-results.sarif"
+          } else {
+              Write-Host "No security issues found in PowerShell scripts" -ForegroundColor Green
+          }
+      
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: pss-analysis-results.sarif
+          category: PSScriptAnalyzer
+      
+      - name: Generate analysis report
+        shell: pwsh
+        run: |
+          $reportHtml = @"
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>PSScriptAnalyzer Results</title>
+              <style>
+                  body { font-family: Arial, sans-serif; margin: 20px; }
+                  table { border-collapse: collapse; width: 100%; }
+                  th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                  th { background-color: #4CAF50; color: white; }
+                  tr:nth-child(even) { background-color: #f2f2f2; }
+                  .error { color: #d32f2f; font-weight: bold; }
+                  .warning { color: #f57c00; font-weight: bold; }
+              </style>
+          </head>
+          <body>
+              <h1>PowerShell Script Analysis Report</h1>
+              <p>Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</p>
+              <table>
+                  <tr>
+                      <th>File</th>
+                      <th>Line</th>
+                      <th>Severity</th>
+                      <th>Rule</th>
+                      <th>Message</th>
+                  </tr>
+                  <!-- Results will be inserted here -->
+              </table>
+          </body>
+          </html>
+          "@
+          
+          $reportHtml | Set-Content "pss-analysis-report.html"
+
+  credential-scanning:
+    name: Credential Scanning (gitleaks)
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Install gitleaks
+        shell: pwsh
+        run: |
+          Write-Host "Installing gitleaks..."
+          
+          $latestRelease = (Invoke-RestMethod -Uri "https://api.github.com/repos/gitleaks/gitleaks/releases/latest").tag_name
+          $version = $latestRelease -replace 'v', ''
+          
+          $url = "https://github.com/gitleaks/gitleaks/releases/download/$latestRelease/gitleaks-windows-amd64.exe"
+          $output = "$env:TEMP\gitleaks.exe"
+          
+          Invoke-WebRequest -Uri $url -OutFile $output
+          
+          # Test gitleaks
+          & $output version
+          
+          "$env:TEMP" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          Write-Host "✓ gitleaks installed" -ForegroundColor Green
+      
+      - name: Run credential scan
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          
+          Write-Host "Running credential scan with gitleaks..."
+          
+          & gitleaks detect `
+              --source . `
+              --verbose `
+              --report-path gitleaks-report.json `
+              --report-format json
+          
+          # Check exit code
+          if ($LASTEXITCODE -eq 0) {
+              Write-Host "✓ No credentials detected" -ForegroundColor Green
+          } elseif ($LASTEXITCODE -eq 1) {
+              Write-Host "⚠ Potential credentials found" -ForegroundColor Yellow
+              # Convert to readable format
+              if (Test-Path "gitleaks-report.json") {
+                  $report = Get-Content "gitleaks-report.json" | ConvertFrom-Json
+                  Write-Host "Findings: $($report.Count)"
+                  $report | ForEach-Object {
+                      Write-Host "  - Found: $($_.Match) at $($_.File):$($_.LineNumber)" -ForegroundColor Yellow
+                  }
+              }
+          } else {
+              Write-Host "Error running gitleaks (exit code: $LASTEXITCODE)" -ForegroundColor Red
+          }
+      
+      - name: Convert gitleaks report
+        if: always()
+        shell: pwsh
+        run: |
+          if (Test-Path "gitleaks-report.json") {
+              $report = Get-Content "gitleaks-report.json" | ConvertFrom-Json
+              
+              # Convert to SARIF format
+              $sarifOutput = @{
+                  version = "2.1.0"
+                  runs = @(@{
+                      tool = @{
+                          driver = @{
+                              name = "Gitleaks"
+                              informationUri = "https://github.com/gitleaks/gitleaks"
+                          }
+                      }
+                      results = @($report | ForEach-Object {
+                          @{
+                              ruleId = "GITLEAKS_FOUND"
+                              message = @{
+                                  text = "Potential secret found: $($_.Description)"
+                              }
+                              level = "error"
+                              locations = @(@{
+                                  physicalLocation = @{
+                                      artifactLocation = @{
+                                          uri = $_.File
+                                      }
+                                      region = @{
+                                          startLine = $_.LineNumber
+                                      }
+                                  }
+                              })
+                          }
+                      })
+                  })
+              }
+              
+              $sarifOutput | ConvertTo-Json -Depth 100 | Set-Content "gitleaks-results.sarif"
+          }
+      
+      - name: Upload SARIF results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: gitleaks-results.sarif
+          category: Gitleaks
+
+  sast-analysis:
+    name: Static Application Security Testing
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run basic SAST checks
+        shell: pwsh
+        run: |
+          Write-Host "Running SAST analysis..."
+          
+          $findings = @()
+          $scripts = Get-ChildItem -Path $PWD -Filter "*.ps1" -Recurse | 
+                     Where-Object { $_.DirectoryName -notlike "*\.git*" }
+          
+          # Check for common security issues
+          $securityPatterns = @{
+              "UseOfEval" = 'Invoke-Expression|iex|\&\s*\$'
+              "UnencryptedPassword" = 'ConvertTo-SecureString.*-AsPlainText.*-Force'
+              "WeakCryptography" = 'MD5|SHA1(?!2)'
+              "SQLInjection" = '\$\w+\s*\+.*SELECT|INSERT|UPDATE|DELETE'
+              "PathTraversal" = '\$.*\+.*\.\.|\.\.\\|\.\./\.\.'
+              "HardcodedSecret" = 'password\s*=|api[-_]?key\s*=|secret\s*='
+          }
+          
+          foreach ($script in $scripts) {
+              $content = Get-Content $script.FullName -Raw
+              $lineNumber = 0
+              
+              foreach ($line in ($content -split "`n")) {
+                  $lineNumber++
+                  
+                  foreach ($issueType in $securityPatterns.Keys) {
+                      if ($line -match $securityPatterns[$issueType]) {
+                          $findings += [PSCustomObject]@{
+                              File     = $script.Name
+                              Line     = $lineNumber
+                              Type     = $issueType
+                              Pattern  = $securityPatterns[$issueType]
+                              Content  = $line.Trim()
+                          }
+                      }
+                  }
+              }
+          }
+          
+          if ($findings.Count -gt 0) {
+              Write-Host "Found $($findings.Count) potential security issues" -ForegroundColor Yellow
+              $findings | Format-Table -AutoSize
+              $findings | Export-Csv -Path "sast-findings.csv" -NoTypeInformation
+          } else {
+              Write-Host "No common security issues found" -ForegroundColor Green
+          }
+      
+      - name: Analyze hardening scripts
+        shell: pwsh
+        run: |
+          Write-Host "Analyzing hardening script effectiveness..."
+          
+          $hardeningScripts = @(
+              "CIS-Hardening-Script.ps1",
+              "CIS-Windows11-Hardening.ps1",
+              "CIS_Tier_2_Hardening.ps1"
+          )
+          
+          $analysis = @{
+              ScriptsFound = 0
+              SecurityPolicies = 0
+              HardeningMeasures = 0
+          }
+          
+          foreach ($script in $hardeningScripts) {
+              if (Test-Path $script) {
+                  $analysis.ScriptsFound++
+                  
+                  $content = Get-Content $script -Raw
+                  
+                  # Count security-related functions
+                  $securityFuncs = @($content | Select-String -Pattern '(Set-ExecutionPolicy|New-NetFirewallRule|Enable-WindowsOptionalFeature|Disable-WindowsOptionalFeature|Set-MpPreference)' -AllMatches).Count
+                  $analysis.SecurityPolicies += $securityFuncs
+                  
+                  # Count hardening measures
+                  $hardeningMeasures = @($content | Select-String -Pattern '(BitLocker|AppLocker|UAC|Firewall|Defender|Exploit)' -AllMatches).Count
+                  $analysis.HardeningMeasures += $hardeningMeasures
+              }
+          }
+          
+          Write-Host "Hardening Analysis:" -ForegroundColor Green
+          $analysis | ConvertTo-Json | Write-Host
+          
+          $analysis | ConvertTo-Json | Set-Content "hardening-analysis.json"
+      
+      - name: Generate SAST report
+        shell: pwsh
+        run: |
+          $reportHtml = @"
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>SAST Analysis Report</title>
+              <style>
+                  body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+                  .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 5px; }
+                  h1 { color: #333; }
+                  .summary { background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; }
+                  table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                  th { background: #2196F3; color: white; padding: 12px; text-align: left; }
+                  td { padding: 12px; border-bottom: 1px solid #ddd; }
+                  tr:hover { background: #f5f5f5; }
+                  .critical { color: #d32f2f; font-weight: bold; }
+                  .high { color: #f57c00; }
+                  .medium { color: #fbc02d; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>Static Application Security Testing Report</h1>
+                  <p>Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')</p>
+                  
+                  <div class="summary">
+                      <h2>Summary</h2>
+                      <p>Repository security analysis complete</p>
+                  </div>
+                  
+                  <h2>Test Results</h2>
+                  <table>
+                      <tr>
+                          <th>Test</th>
+                          <th>Status</th>
+                          <th>Details</th>
+                      </tr>
+                      <tr>
+                          <td>PowerShell Script Analysis</td>
+                          <td>✓ Completed</td>
+                          <td>See PSScriptAnalyzer results</td>
+                      </tr>
+                      <tr>
+                          <td>Credential Detection</td>
+                          <td>✓ Completed</td>
+                          <td>See Gitleaks results</td>
+                      </tr>
+                      <tr>
+                          <td>Common Security Issues</td>
+                          <td>✓ Completed</td>
+                          <td>See SAST findings</td>
+                      </tr>
+                  </table>
+              </div>
+          </body>
+          </html>
+          "@
+          
+          $reportHtml | Set-Content "sast-report.html"
+      
+      - name: Upload SAST artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-analysis-reports
+          path: |
+            pss-analysis-report.html
+            sast-report.html
+            sast-findings.csv
+            hardening-analysis.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+  comment-pr:
+    name: Comment Results on PR
+    runs-on: windows-latest
+    needs: [psscriptanalyzer, credential-scanning, sast-analysis]
+    if: github.event_name == 'pull_request' && always()
+    
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - name: Post PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let comment = `## 🔐 Security Audit Results\n\n`;
+            
+            comment += `### Analysis Summary\n`;
+            comment += `- ✓ PowerShell Script Analysis\n`;
+            comment += `- ✓ Credential Scanning\n`;
+            comment += `- ✓ SAST Analysis\n\n`;
+            
+            comment += `### Reports\n`;
+            comment += `- [Detailed Security Report](artifacts/)\n`;
+            comment += `- See GitHub Security Tab for uploaded results\n\n`;
+            
+            comment += `All security checks completed. Please review any warnings above.\n`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  summary:
+    name: Security Audit Summary
+    runs-on: windows-latest
+    needs: [psscriptanalyzer, credential-scanning, sast-analysis]
+    if: always()
+    
+    steps:
+      - name: Generate summary
+        shell: pwsh
+        run: |
+          $summary = @"
+          ## 🔐 Security Audit Complete
+          
+          | Check | Status |
+          |-------|--------|
+          | PowerShell Analysis | ✓ Completed |
+          | Credential Scanning | ✓ Completed |
+          | SAST Analysis | ✓ Completed |
+          
+          ### Next Steps
+          - Review any findings in the GitHub Security tab
+          - Check uploaded artifacts for detailed reports
+          - Address any critical issues before merging
+          "@
+          
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+

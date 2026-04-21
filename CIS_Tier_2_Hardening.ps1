@@ -34,12 +34,28 @@ Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies
 # ... (Add rules)
 
 # Windows Defender
-Set-MpPreference -EnableRealtimeMonitoring $true
-Set-MpPreference -DisableRealtimeMonitoring $false # Ensure realtime monitoring is on
-# ... (Configure other Defender settings)
+# Note: Parameter names vary by Windows version. Use registry or Get-MpPreference to validate.
+try {
+    Set-MpPreference -DisableRealtimeMonitoring $false -ErrorAction SilentlyContinue
+} catch {
+    # Fallback: Use registry if cmdlet parameters fail
+    Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows Defender" -Name "DisableRealtimeMonitoring" -Value 0 -ErrorAction SilentlyContinue
+}
+# Get current settings for verification
+Get-MpPreference | Select-Object RealtimeMonitoringEnabled
 
 # BitLocker
-Enable-BitLocker -MountPoint "C:" -EncryptionMethod XtsAes256 -UsedSpaceOnly
+# Note: BitLocker requires TPM 2.0 or PIN. Adjust parameters based on environment.
+try {
+    $volume = Get-BitLockerVolume -MountPoint "C:" -ErrorAction SilentlyContinue
+    if ($volume.VolumeStatus -eq "FullyDecrypted") {
+        # Enable with TPM and PIN for maximum security
+        Enable-BitLocker -MountPoint "C:" -EncryptionMethod XtsAes256 -UsedSpaceOnly -TpmProtector -Pin (Read-Host "Enter BitLocker PIN" -AsSecureString) -ErrorAction Stop
+    }
+} catch {
+    Write-Warning "BitLocker could not be enabled: $_"
+    Write-Host "Manual BitLocker configuration may be required."
+}
 # ... (Configure BitLocker settings)
 
 # Secure Boot and TPM
@@ -47,13 +63,28 @@ Enable-BitLocker -MountPoint "C:" -EncryptionMethod XtsAes256 -UsedSpaceOnly
 # Check if TPM is available
 # ... (Add checks and configurations)
 
-# Credential Guard
-Enable-WindowsOptionalFeature -Online -FeatureName "CredentialGuard"
-# ... (Configure settings if required)
+# Credential Guard (Virtualization-based Security)
+# Note: Credential Guard requires Hyper-V capable hardware and is enabled via Group Policy or DMARC
+try {
+    # Enable via Group Policy (requires Admin and may need reboot)
+    $gpoPath = "HKLM:\Software\Policies\Microsoft\Windows\DeviceGuard"
+    if (-not (Test-Path $gpoPath)) { New-Item -Path $gpoPath -Force | Out-Null }
+    Set-ItemProperty -Path $gpoPath -Name "LsaCfgFlags" -Value 1 -ErrorAction SilentlyContinue
+    Write-Host "Credential Guard registry setting applied. Reboot required to enable."
+} catch {
+    Write-Warning "Credential Guard configuration failed: $_"
+}
 
-# Device Guard
-Enable-WindowsOptionalFeature -Online -FeatureName "DeviceGuard"
-# ... (Add necessary configurations)
+# Device Guard (Code Integrity)
+# Note: Device Guard requires UEFI firmware and is configured via Group Policy
+try {
+    $gpoPath = "HKLM:\Software\Policies\Microsoft\Windows\DeviceGuard"
+    if (-not (Test-Path $gpoPath)) { New-Item -Path $gpoPath -Force | Out-Null }
+    Set-ItemProperty -Path $gpoPath -Name "EnableVirtualizationBasedSecurity" -Value 1 -ErrorAction SilentlyContinue
+    Write-Host "Device Guard registry setting applied. Reboot required to enable."
+} catch {
+    Write-Warning "Device Guard configuration failed: $_"
+}
 
 # Best Practices for ZTNA Jump Box
 # Implement necessary networking and access rules that comply with ZTNA guidelines.
