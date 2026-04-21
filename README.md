@@ -1,3 +1,5 @@
+<img width="800" height="436" alt="image" src="https://github.com/user-attachments/assets/890a2227-d21e-4583-8424-204b93c26081" />
+
 # Windows Safety Jump Box
 
 ## Comprehensive Features
