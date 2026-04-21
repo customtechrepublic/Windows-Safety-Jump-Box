@@ -1,24 +1,28 @@
 ```
    ╔═══════════════════════════════════════════════════════════════════════════╗
    ║                                                                           ║
-   ║        ██████╗ ███████╗██████╗ ██╗   ██╗██████╗ ██╗     ██╗ ██████╗    ║
-   ║        ██╔════╝ ██╔════╝██╔══██╗██║   ██║██╔══██╗██║     ██║██╔════╝    ║
-   ║        ██║  ███╗█████╗  ██████╔╝██║   ██║██████╔╝██║     ██║██║         ║
-   ║        ██║   ██║██╔══╝  ██╔═══╝ ██║   ██║██╔══██╗██║     ██║██║         ║
-   ║        ╚██████╔╝███████╗██║     ╚██████╔╝██████╔╝███████╗██║╚██████╗    ║
-   ║         ╚═════╝ ╚══════╝╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝    ║
+   ║        ██████╗ ███████╗██████╗ ██╗   ██╗██████╗ ██╗     ██╗ ██████╗       ║
+   ║        ██╔════╝ ██╔════╝██╔══██╗██║   ██║██╔══██╗██║     ██║██╔════╝      ║
+   ║        ██║  ███╗█████╗  ██████╔╝██║   ██║██████╔╝██║     ██║██║           ║
+   ║        ██║   ██║██╔══╝  ██╔═══╝ ██║   ██║██╔══██╗██║     ██║██║           ║
+   ║        ╚██████╔╝███████╗██║     ╚██████╔╝██████╔╝███████╗██║╚██████╗      ║
+   ║         ╚═════╝ ╚══════╝╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝      ║
    ║                                                                           ║
-   ║              🛡️  CUSTOM PC REPUBLIC  🛡️                                 ║
-   ║         IT Synergy Energy for the Republic                              ║
+   ║              🛡️  CUSTOM PC REPUBLIC  🛡️                                  ║
+   ║         IT Synergy Energy for the Republic                                ║
    ║                                                                           ║
-   ║     CIS Level 2 Hardened Windows Image Builder & Deployment Suite       ║
+   ║     CIS Level 2 Hardened Windows Image Builder & Deployment Suite         ║
    ║                                                                           ║
    ╚═══════════════════════════════════════════════════════════════════════════╝
 ```
+<img width="800" height="436" alt="brandlogo" src="https://github.com/user-attachments/assets/6f4dde71-852a-4305-8f16-ed1c4527cab8" />
 
 # CIS Level 2 Hardened Windows Image Builder & Deployment Suite
 
 **🛡️ Custom PC Republic - Enterprise-grade hardened Windows imaging solution**
+<img width="800" height="436" alt="brandlogo" src="https://github.com/user-attachments/assets/974df4cc-8dfa-4137-8be3-5db24df2e64e" />
+
+
 
 > *"IT Synergy Energy for the Republic"* - Secure, auditable, and repeatable Windows deployments with incident response capabilities.
 
