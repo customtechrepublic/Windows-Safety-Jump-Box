@@ -1,3 +1,6 @@
+<img width="800" height="436" alt="image" src="https://github.com/user-attachments/assets/25c2df96-119b-4f29-abe1-4b0dce85842c" />
+
+
 # Windows Safety Jump Box
 
 The **Windows Safety Jump Box** project is designed to provide a secure and efficient solution for managing remote desktop connections. This tool simplifies access to remote servers while enhancing security protocols to protect sensitive data.
@@ -24,6 +27,6 @@ Have questions? Reach out to us at [customtechrepublic@example.com](mailto:custo
 ---
 
 ### Visit Our Website
-For more information, visit our [official website](https://www.example.com).
+For more information, or for a fully managed option of this deployment and cybersecurity and all IT support please visit our [official website](https://www.custompcrepublic.com).
 
 Thank you for checking out **Windows Safety Jump Box**!
