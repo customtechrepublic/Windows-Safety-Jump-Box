@@ -1,0 +1,451 @@
+# ============================================================================
+# Windows Factory - Quick Start Template: Forensic/Recovery PE
+# Language of the Land (LotL) Approach
+# ============================================================================
+# Anointing: "I anoint this Windows for Incident Response & Recovery"
+# Target: IT Support, Security Incident Responders, System Administrators
+# Purpose: WinPE boot environment with forensic tools for malware scanning, 
+#          system recovery, offline hardening, and incident response
+# ============================================================================
+
+@{
+    # ===== METADATA =====
+    TemplateName = "Forensic/Recovery PE"
+    TemplateID = "forensicpe-001"
+    Version = "1.0.0"
+    Author = "Custom PC Republic"
+    Description = "Bootable WinPE environment with forensic and recovery tools. Includes Sysinternals Suite, Microsoft SARA, malware scanners, registry editors, and network tools. Use for incident response, malware cleanup, offline system recovery, and pre-deployment hardening."
+    
+    # ===== COMPATIBILITY =====
+    TargetOS = @("WinPE", "Windows10", "Windows11", "Server2019", "Server2022")
+    MinimumRAM = "4GB"
+    MinimumDisk = "8GB"  # USB drive size
+    CISLevel = "N/A"  # PE is not a full OS
+    
+    # ===== TEMPLATE TYPE =====
+    IsWinPE = $true
+    OutputFormat = "ISO"  # Bootable ISO
+    BootableMedia = $true
+    
+    # ===== WINPE CONFIGURATION =====
+    WinPESettings = @{
+        # WinPE version
+        Version = "11"  # WinPE for Windows 11
+        
+        # Architecture
+        Architecture = "x64"
+        
+        # Boot.wim name
+        BootWIMName = "Boot"
+        
+        # Scratch space (RAM disk for temp files)
+        ScratchSpace = "512"
+        
+        # Optional packages to include
+        OptionalPackages = @(
+            "WinPE-NetFx",           # .NET support
+            "WinPE-PowerShell",      # PowerShell
+            "WinPE-WMI",             # WMI support
+            "WinPE-Scripting",       # Scripting support
+            "WinPE-StorageWMI",     # Storage WMI
+            "WinPE-HTA",            # HTML Applications
+            "WinPE-Dot3Svc",        # IEEE 802.1X
+            "WinPE-EnhancedStorage"  # Enhanced storage
+        )
+        
+        # Boot settings
+        BootImagePath = ""
+        BackgroundFile = ""  # Custom background
+        LogoFile = ""  # Custom logo
+    }
+    
+    # ===== FORENSIC TOOLS TO INCLUDE =====
+    ForensicTools = @{
+        # Sysinternals Suite (auto-updated at build time)
+        IncludeSysinternals = $true
+        SysinternalsURL = "https://download.sysinternals.com/files/SysinternalsSuite.zip"
+        
+        # Microsoft SARA (Support and Recovery Assistant)
+        IncludeSARA = $true
+        SARAUrl = "https://download.microsoft.com/download"
+        
+        # Malware Scanners
+        IncludeMalwareScanners = $true
+        Scanners = @(
+            @{
+                Name = "Microsoft Safety Scanner"
+                URL = "https://www.microsoft.com/wdsi/filesubmission"
+                Type = "Standalone"
+            },
+            @{
+                Name = "KVRT"  # Kaspersky Virus Removal Tool
+                URL = "https://www.kaspersky.com/downloads/total-security"
+                Type = "Standalone"
+            }
+        )
+        
+        # Network Tools
+        IncludeNetworkTools = $true
+        NetworkTools = @(
+            "ping",
+            "ipconfig",
+            "netsh",
+            "nslookup",
+            "tracert",
+            "route"
+        )
+        
+        # Registry Tools
+        IncludeRegistryTools = $true
+        RegistryTools = @(
+            "regedit.exe",  # Included in WinPE
+            "reg.exe"       # Included in WinPE
+        )
+        
+        # Disk Management
+        IncludeDiskTools = $true
+        DiskTools = @(
+            "diskpart.exe",
+            "diskmgmt.msc",
+            "chkdsk.exe",
+            "format.exe"
+        )
+        
+        # File Recovery
+        IncludeFileRecovery = $true
+        RecoveryTools = @(
+            " photorec",     # Mention in documentation
+            "recuva"        # Mention in documentation
+        )
+    }
+    
+    # ===== CUSTOM SCRIPTS TO INCLUDE =====
+    CustomScripts = @{
+        # Pre-deployment offline hardening script
+        IncludeOfflineHardening = $true
+        HardeningScript = "Offline-Hardening.ps1"
+        
+        # Malware scan script
+        IncludeMalwareScan = $true
+        MalwareScanScript = "Forensic-Scan.ps1"
+        
+        # System recovery script
+        IncludeRecovery = $true
+        RecoveryScript = "System-Recovery.ps1"
+        
+        # Report generator
+        IncludeReport = $true
+        ReportScript = "Forensic-Report.ps1"
+    }
+    
+    # ===== NETWORK DRIVERS =====
+    NetworkDrivers = @{
+        # Inject network drivers
+        InjectDrivers = $true
+        
+        # Common driver categories
+        DriverCategories = @(
+            "Ethernet",
+            "WiFi",
+            "Virtual"  # For VMs
+        )
+        
+        # Paths to driver packages (to be provided by user)
+        DriverPaths = @()
+    }
+    
+    # ===== BOOT CONFIGURATION =====
+    BootConfig = @{
+        # Timeouts
+        BootTimeout = 30
+        
+        # Display settings
+        Resolution = "1920x1080"
+        BitsPerPixel = 32
+        
+        # Language
+        KeyboardLayout = "en-US"
+        InputLocale = "en-US"
+        
+        # Startup options
+        DisableRecovery = $false
+        ShowWinPE = $true
+    }
+    
+    # ===== AUTOEXEC CONFIGURATION =====
+    AutoExec = @{
+        # Auto-run on boot
+        EnableAutoRun = $true
+        
+        # Menu options
+        ShowMenu = $true
+        MenuItems = @(
+            @{
+                Name = "Forensic Tools"
+                Description = "Launch Sysinternals Suite"
+                Command = "C:\Tools\SysinternalsSuite\Autoruns.exe"
+            },
+            @{
+                Name = "Malware Scan"
+                Description = "Run malware scanner"
+                Command = "powershell.exe -NoExit -File C:\Scripts\Forensic-Scan.ps1"
+            },
+            @{
+                Name = "Offline Hardening"
+                Description = "Apply hardening to offline Windows"
+                Command = "powershell.exe -NoExit -File C:\Scripts\Offline-Hardening.ps1"
+            },
+            @{
+                Name = "Command Prompt"
+                Description = "Open command prompt"
+                Command = "cmd.exe"
+            },
+            @{
+                Name = "Registry Editor"
+                Description = "Edit Windows Registry"
+                Command = "regedit.exe"
+            },
+            @{
+                Name = "Disk Management"
+                Description = "Manage disks and volumes"
+                Command = "diskmgmt.msc"
+            },
+            @{
+                Name = "Network Configuration"
+                Description = "Configure network"
+                Command = "ncpa.cpl"
+            },
+            @{
+                Name = "Shutdown"
+                Description = "Shutdown computer"
+                Command = "shutdown.exe /s /t 0"
+            },
+            @{
+                Name = "Reboot"
+                Description = "Reboot computer"
+                Command = "shutdown.exe /r /t 0"
+            }
+        )
+    }
+    
+    # ===== OFFLINE HARDENING (RUN FROM PE) =====
+    OfflineHardening = @{
+        # Apply to offline Windows installations
+        EnableOfflineHardening = $true
+        
+        # Target volumes (drives to scan for Windows)
+        TargetVolumes = @("C:", "D:", "E:")
+        
+        # Actions to perform
+        Actions = @(
+            # Disable SMBv1 on all volumes
+            @{
+                Name = "Disable SMBv1"
+                Type = "Registry"
+                Path = "System\CurrentControlSet\Services\LanmanServer\Parameters"
+                Value = "SMB1"
+                Data = 0
+                DataType = "DWord"
+            },
+            
+            # Disable NetBIOS
+            @{
+                Name = "Disable NetBIOS"
+                Type = "Registry"
+                Path = "System\CurrentControlSet\Services\NetBT\Parameters\Interfaces"
+                Value = "NetbiosOptions"
+                Data = 2
+                DataType = "DWord"
+            },
+            
+            # Enable Windows Firewall
+            @{
+                Name = "Enable Firewall"
+                Type = "Service"
+                ServiceName = "MpsSvc"
+                StartType = "Automatic"
+            },
+            
+            # Disable Remote Registry
+            @{
+                Name = "Disable Remote Registry"
+                Type = "Service"
+                ServiceName = "RemoteRegistry"
+                StartType = "Disabled"
+            },
+            
+            # Remove known malware paths
+            @{
+                Name = "Remove Temp Malware"
+                Type = "FileDelete"
+                Paths = @(
+                    "%TEMP%\*.exe",
+                    "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\*.exe"
+                )
+            }
+        )
+    }
+    
+    # ===== FORENSIC SCANNING =====
+    ForensicScanning = @{
+        # Run malware scans
+        EnableScan = $true
+        
+        # Scan targets
+        ScanPaths = @(
+            "C:\Windows\System32",
+            "C:\Windows\SysWOW64",
+            "%APPDATA%",
+            "%LOCALAPPDATA%",
+            "C:\Users\*\Documents"
+        )
+        
+        # Scan options
+        Options = @{
+            Heuristics = $true
+            Rootkits = $true
+            PUPs = $true
+            ArchiveScan = $true
+        }
+        
+        # Actions on detection
+        OnDetection = @{
+            Quarantine = $true
+            Log = $true
+            Report = $true
+        }
+    }
+    
+    # ===== REPORTING =====
+    Reporting = @{
+        # Generate forensic report
+        EnableReport = $true
+        
+        # Report contents
+        IncludeSections = @(
+            "System Information",
+            "Installed Software",
+            "Running Processes",
+            "Network Connections",
+            "Scheduled Tasks",
+            "Services",
+            "Autoruns",
+            "Recent Files",
+            "Malware Scan Results",
+            "Registry Snapshots"
+        )
+        
+        # Output format
+        OutputFormat = @("HTML", "JSON")
+        
+        # Output location
+        OutputPath = "X:\ForensicReports"
+    }
+    
+    # ===== STORAGE & MEDIA =====
+    StorageConfig = @{
+        # ISO output
+        ISOOutput = "ForensicPE.iso"
+        
+        # USB creation
+        CreateUSB = $false
+        USBDrive = ""
+        
+        # ISO label
+        ISOLabel = "FORENSIC-PE"
+        
+        # File size estimation
+        EstimatedSize = "800MB"
+    }
+    
+    # ===== COMPLIANCE NOTES =====
+    Compliance = @{
+        Note = "PE environment is not a full OS - standard CIS controls do not apply"
+        Considerations = @(
+            "All tools are read-only when running from PE",
+            "Changes to offline systems require explicit offline hardening action",
+            "Forensic evidence should be hashed and logged",
+            "Chain of custody should be maintained"
+        )
+    }
+    
+    # ===== USAGE SCENARIOS =====
+    UsageScenarios = @(
+        # Scenario 1: Incident Response
+        @{
+            Name = "Incident Response"
+            Steps = @(
+                "1. Boot from Forensic PE",
+                "2. Run malware scan",
+                "3. Capture system information",
+                "4. Review running processes",
+                "5. Quarantine malware",
+                "6. Generate forensic report"
+            )
+        },
+        
+        # Scenario 2: Offline Hardening
+        @{
+            Name = "Offline Hardening"
+            Steps = @(
+                "1. Boot target from Forensic PE",
+                "2. Select 'Offline Hardening'",
+                "3. Script scans for Windows installations",
+                "4. Applies registry hardening",
+                "5. Disables vulnerable services",
+                "6. Reports changes made"
+            )
+        },
+        
+        # Scenario 3: System Recovery
+        @{
+            Name = "System Recovery"
+            Steps = @(
+                "1. Boot from Forensic PE",
+                "2. Use disk tools to check integrity",
+                "3. Run SARA for Windows repair",
+                "4. Recover important files",
+                "5. Export logs for analysis"
+            )
+        },
+        
+        # Scenario 4: Pre-Deployment Hardening
+        @{
+            Name = "Pre-Deployment Hardening"
+            Steps = @(
+                "1. Mount Windows ISO or connect drive",
+                "2. Boot into Forensic PE",
+                "3. Run offline hardening script",
+                "4. Apply CIS-aligned registry settings",
+                "5. Verify changes",
+                "6. Deploy hardened image"
+            )
+        }
+    )
+    
+    # ===== RISK ASSESSMENT =====
+    RiskAssessment = @{
+        AttackSurface = "Minimal - PE is read-only by design"
+        DataExfiltration = "N/A - PE environment is isolated"
+        MalwareRisk = "Low - Running from trusted media"
+        Recovery = "High - Tools for recovery included"
+        Forensics = "High - Full forensic capabilities"
+    }
+    
+    # ===== IMPORTANT WARNINGS =====
+    Warnings = @(
+        "Always hash-verify tools after download",
+        "Maintain chain of custody for forensic evidence",
+        "Use write-blockers when analyzing evidence",
+        "Backup critical data before applying offline hardening",
+        "Test offline hardening on non-production systems first"
+    )
+    
+    # ===== REFERENCES =====
+    References = @(
+        "CIS Windows 10/11 Benchmark",
+        "NIST SP 800-101 Forensic Guidelines",
+        "SANS Digital Forensics Guidelines",
+        "Microsoft WinPE Documentation"
+    )
+}

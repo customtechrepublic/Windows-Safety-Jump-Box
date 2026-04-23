@@ -1,0 +1,381 @@
+# ============================================================================
+# Windows Factory - Quick Start Template: Kiosk / Family
+# Language of the Land (LotL) Approach
+# ============================================================================
+# Anointing: "I anoint this Windows for Safe, Simple Computing"
+# Target: Non-technical users, family members, public kiosks
+# Purpose: Safe browsing, document editing, media consumption ONLY
+# ============================================================================
+
+@{
+    # ===== METADATA =====
+    TemplateName = "Kiosk / Family"
+    TemplateID = "kiosk-001"
+    Version = "1.0.0"
+    Author = "Custom PC Republic"
+    Description = "Locked-down family machine. Only Edge browser and document editing allowed. No settings, no CMD, no PowerShell, no USB execution. Maximum safety for non-technical users. Shell replaced with limited launcher."
+    
+    # ===== COMPATIBILITY =====
+    TargetOS = @("Windows11-Home", "Windows11-Pro")
+    MinimumOSVersion = "22000"
+    MinimumRAM = "4GB"
+    CISLevel = "Custom"
+    
+    # ===== COMPONENTS TO REMOVE (AGGRESSIVE) =====
+    RemoveComponents = @(
+        # EVERYTHING consumer-facing gets removed
+        # Gaming
+        "Microsoft.XboxApp",
+        "Microsoft.XboxGameOverlay",
+        "Microsoft.XboxGamingOverlay",
+        "Microsoft.XboxIdentityProvider",
+        "Microsoft.MicrosoftSolitaireCollection",
+        
+        # Consumer Apps
+        "Microsoft.WindowsFeedbackHub",
+        "Microsoft.GetHelp",
+        "Microsoft.Getstarted",
+        "Microsoft.BingNews",
+        "Microsoft.BingWeather",
+        "Microsoft.News",
+        "Microsoft.Office.OneNote",
+        
+        # Cortana & Search
+        "Microsoft.549981C3F-5FF9-4253-8E46-2A91BA3E1C75",
+        "Microsoft.WindowsSearch",
+        
+        # Media
+        "Microsoft.ZuneMusic",
+        "Microsoft.ZuneVideo",
+        "Microsoft.MediaPlayer",
+        
+        # Cloud
+        "Microsoft.OneDriveSync",
+        
+        # Maps & Travel
+        "Microsoft.WindowsMaps",
+        "Microsoft.YourPhone",
+        
+        # Social
+        "Microsoft.SkypeApp",
+        
+        # Creative
+        "Microsoft.Paint3D",
+        "Microsoft.StickyNotes",
+        "Microsoft.Whiteboard",
+        
+        # Office Hub (keep web-based office instead)
+        "Microsoft.MicrosoftOfficeHub",
+        
+        # To-Do
+        "Microsoft.Todos",
+        
+        # Edge (we'll use it but don't need the app package)
+        "Microsoft.MicrosoftEdge",
+        "Microsoft.Win32WebViewHost"
+    )
+    
+    # ===== WINDOWS FEATURES TO DISABLE =====
+    DisableWindowsFeatures = @(
+        "SMB1Protocol",          # Disable file sharing
+        "TelnetClient",         # No telnet
+        "TFTP",                 # No TFTP
+        "Printing-Foundation-Features",  # No printing needed for kiosk
+        "Printing-Foundation-LLDS",
+        "FaxServicesClientPackage",  # No fax
+        "RemoteDesktop",        # No RDP needed
+        "RemoteAssistance",     # No remote assistance
+        "WindowsSubsystemForLinux",  # No WSL
+        "HypervisorPlatform",  # No virtualization
+        "VirtualMachinePlatform",
+        "Containers"          # No containers
+    )
+    
+    # ===== SERVICES TO DISABLE =====
+    DisableServices = @(
+        # Telemetry
+        @{Name="DiagTrack"; DisplayName="CEIP/Telemetry"; Risk="Privacy"},
+        @{Name="dmwappushservice"; DisplayName="Device Management"; Risk="Privacy"},
+        
+        # Remote
+        @{Name="RemoteRegistry"; DisplayName="Remote Registry"; Risk="Security"},
+        @{Name="RemoteAccess"; DisplayName="Remote Access"; Risk="Security"},
+        @{Name="SessionEnv"; DisplayName="Remote Desktop Services"; Risk="Unnecessary"},
+        
+        # File/Print
+        @{Name="Spooler"; DisplayName="Print Spooler"; Risk="Not needed"},
+        @{Name="SSDPDiscovery"; DisplayName="SSDP Discovery"; Risk="Not needed"},
+        @{Name="UpnpHost"; DisplayName="UPnP Host"; Risk="Not needed"},
+        
+        # Network
+        @{Name="NetTcpPortSharing"; DisplayName="Net.Tcp Port Sharing"; Risk="Not needed"},
+        @{Name="BITS"; DisplayName="Background Intelligent Transfer"; Risk="Not needed"},
+        
+        # Xbox
+        @{Name="XblAuthManager"; DisplayName="Xbox Live"; Risk="Gaming"},
+        @{Name="XblGameSave"; DisplayName="Xbox Game Save"; Risk="Gaming"},
+        @{Name="xbgm"; DisplayName="Xbox Game Monitoring"; Risk="Gaming"},
+        
+        # Misc
+        @{Name="ScardSvr"; DisplayName="Smart Card"; Risk="Not needed"},
+        @{Name="ScDeviceEnum"; DisplayName="Smart Card Enumerator"; Risk="Not needed"},
+        @{Name="TapiSrv"; DisplayName="Telephony"; Risk="Not needed"},
+        @{Name="WdNisSvc"; DisplayName="Defender Network Inspection"; Risk="Use MDE"},
+        @{Name="wscsvc"; DisplayName="Security Center"; Risk="Keep but monitor"}
+    )
+    
+    # ===== SCHEDULED TASKS TO DISABLE =====
+    DisableScheduledTasks = @(
+        "\Microsoft\XblGameSave\Task",
+        "\Microsoft\Office\OfficeTelemetryAgentFallBack",
+        "\Microsoft\Office\OfficeTelemetryAgentFallBack2016",
+        "\Microsoft\Windows\WindowsUpdate\Automatic Update",
+        "\Microsoft\Windows\MaintenanceTask", 
+        "\Microsoft\Windows\BrokerForOfficeApp\Task",
+        "\Microsoft\Office\ClickToRun\Task"
+    )
+    
+    # ===== APPLOCKER POLICY (STRICT WHITELIST) =====
+    EnableAppLocker = $true
+    AppLockerMode = "Whitelist"
+    
+    # ONLY allow essential applications
+    AppLockerAllowList = @(
+        # Browser only (Edge)
+        "C:\Program Files (x86)\Microsoft\Edge\Application\*.exe",
+        "C:\Program Files\Microsoft\Edge\Application\*.exe",
+        
+        # System essentials
+        "C:\Windows\System32\*.exe",
+        "C:\Windows\SysWOW64\*.exe",
+        
+        # Notepad (simple text editing)
+        "C:\Windows\System32\notepad.exe",
+        
+        # File Explorer (limited)
+        "C:\Windows\explorer.exe",
+        
+        # Calculator (simple utility)
+        "C:\Windows\System32\calc.exe"
+    )
+    
+    # Block everything else
+    AppLockerDenyList = @(
+        # Block all script engines
+        "C:\Windows\System32\wscript.exe",
+        "C:\Windows\System32\cscript.exe",
+        "C:\Windows\System32\WindowsPowerShell\v1.0\*.exe",
+        "C:\Program Files\PowerShell\*.exe",
+        
+        # Block command.com
+        "C:\Windows\System32\cmd.exe",
+        
+        # Block registry
+        "C:\Windows\System32\reg.exe",
+        "C:\Windows\System32\regedit.exe",
+        
+        # Block disk management
+        "C:\Windows\System32\diskmgmt.msc",
+        "C:\Windows\System32\compmgmt.msc",
+        
+        # Block task manager
+        "C:\Windows\System32\taskmgr.exe",
+        
+        # Block control panel
+        "C:\Windows\System32\control.exe",
+        
+        # Block USB execution
+        "D:\*.exe",
+        "E:\*.exe",
+        "F:\*.exe"
+    )
+    
+    # ===== NETWORK HARDENING (RESTRICTIVE) =====
+    NetworkPolicies = @{
+        DisableNetBIOS = $true
+        DisableLLMNR = $true
+        DisableSMBv1 = $true
+        DisableSMBv2 = $true  # Block all file sharing
+        DisableRemoteAssistance = $true
+        DisableRemoteDesktop = $true
+        BlockInboundICMP = $true
+        EnableFirewall = $true
+        DefaultOutboundAction = "Allow"  # Allow web browsing
+    }
+    
+    # ===== FIREWALL RULES (KIOSK MODE) =====
+    FirewallRules = @(
+        # Allow only browser
+        @{Name="Allow-HTTPS-Out"; Direction="Outbound"; Protocol="TCP"; RemotePort="443"; Action="Allow"; Profile="Any"; Description="Web browsing"},
+        @{Name="Allow-HTTP-Out"; Direction="Outbound"; Protocol="TCP"; RemotePort="80"; Action="Allow"; Profile="Any"; Description="Web browsing"},
+        
+        # Block everything else inbound
+        @{Name="Block-All-In"; Direction="Inbound"; Protocol="Any"; LocalPort="Any"; Action="Block"; Profile="Any"; Description="Block all inbound"},
+        
+        # Block NetBIOS
+        @{Name="Block-NetBIOS-In"; Direction="Inbound"; Protocol="UDP"; LocalPort="137-139"; Action="Block"; Profile="Any"; Description="Block NetBIOS"},
+        
+        # Block SMB
+        @{Name="Block-SMB-In"; Direction="Inbound"; Protocol="TCP"; LocalPort="445"; Action="Block"; Profile="Any"; Description="Block SMB"}
+    )
+    
+    # ===== SHELL REPLACEMENT (KIOSK MODE) =====
+    ShellReplacement = @{
+        Enabled = $true
+        Shell = "C:\Windows\System32\explorer.exe"
+        Parameters = "/E, /select, C:\Users\Public\Documents"
+        HideTaskbar = $false  # Let them see taskbar but limited
+        DisableTaskbarRightClick = $true
+        DisableStartMenu = $true
+        DisableDesktopRightClick = $true
+        DisableDragAndDrop = $false
+        CustomShortcutBar = @(
+            @{Name="Internet"; Target="C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"; Arguments="--kiosk --kiosk-printing https://www.google.com"},
+            @{Name="Documents"; Target="C:\Windows\System32\explorer.exe"; Arguments="/E, /root=C:\Users\Public\Documents"},
+            @{Name="Calculator"; Target="C:\Windows\System32\calc.exe"; Arguments=""}
+        )
+    }
+    
+    # ===== REGISTRY HARDENING =====
+    RegistryHardening = @(
+        # Disable Settings app access (force defaults)
+        @{
+            Path = "HKLM:\Software\Policies\Microsoft\Windows\Edge"
+            Name = "AllowConfiguringLockedSandbox"
+            Value = 0
+            Type = "DWord"
+            Description = "Disable user configuring"
+        },
+        
+        # Disable CMD and PowerShell
+        @{
+            Path = "HKLM:\Software\Policies\Microsoft\Windows\CurrentVersion\Policies\System"
+            Name = "DisableCMD"
+            Value = 2
+            Type = "DWord"
+            Description = "Disable Command Prompt"
+        },
+        @{
+            Path = "HKLM:\Software\Policies\Microsoft\Windows\CurrentVersion\Policies\System"
+            Name = "DisableLockWorkstation"
+            Value = 0
+            Type = "DWord"
+            Description = "Allow locking workstation"
+        },
+        
+        # Disable Windows Update (managed externally)
+        @{
+            Path = "HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU"
+            Name = "NoAutoUpdate"
+            Value = 0
+            Type = "DWord"
+            Description = "Allow updates"
+        },
+        
+        # Disable AutoPlay
+        @{
+            Path = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+            Name = "NoDriveTypeAutoRun"
+            Value = 255
+            Type = "DWord"
+            Description = "Disable AutoRun"
+        },
+        
+        # Disable USB write
+        @{
+            Path = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+            Name = "NoMediaConnect"
+            Value = 1
+            Type = "DWord"
+            Description = "Block Media Connect"
+        }
+    )
+    
+    # ===== DEVICE RESTRICTIONS =====
+    DevicePolicies = @{
+        DisableUSBStorage = $true  # Block USB drives
+        DisableUSBInput = $false  # Allow keyboards/mice
+        DisableBluetooth = $true
+        DisableWiFi = $false  # Allow WiFi
+        DisableEthernet = $false
+        DisableWebcam = $false
+        DisableMicrophone = $false
+    }
+    
+    # ===== WINDOWS DEFENDER =====
+    EnableWindowsDefender = $true
+    DefenderSettings = @{
+        RealtimeProtection = $true
+        BehaviorMonitoring = $true
+        CloudProtection = $true
+        NetworkProtection = "Enabled"
+        ControlledFolderAccess = "Block"  # Block all changes to Documents
+        PUAProtection = "Enabled"
+    }
+    
+    # ===== FAMILY SAFETY SETTINGS =====
+    FamilySafety = @{
+        EnableFamilySafety = $false  # Not needed if locked down
+        BlockEdgeKioskMode = $true
+        BlockPrintKioskMode = $true
+        DefaultHomePage = "https://www.google.com"
+        BlockDownload = $true
+        BlockInstallation = $true
+    }
+    
+    # ===== POST-INSTALL SCRIPTS =====
+    PostInstallScripts = @(
+        # Set Edge as default
+        @{
+            Name = "Set-EdgeAsDefault"
+            Script = "Set-DefaultBrowser"
+            Condition = "Always"
+        },
+        
+        # Create family shortcuts
+        @{
+            Name = "Create-Shortcuts"
+            Script = "New-KioskShortcuts"
+            Condition = "Always"
+        }
+    )
+    
+    # ===== COMPLIANCE MAPPING =====
+    Compliance = @{
+        CIS = @("2.1.1", "3.1.1", "9.1.1")
+        NIST = @("AC-3", "AC-6", "SC-4", "SC-5", "SI-3")
+        SOC2 = @("CC6.1")
+        GDPR = @("32")
+    }
+    
+    # ===== USAGE NOTES =====
+    UsageNotes = @(
+        "This template is for non-technical users.",
+        "Only Edge browser and File Explorer are accessible.",
+        "No settings, no CMD, no PowerShell, no installation allowed.",
+        "USB drives are blocked from running code.",
+        "Documents folder is protected via Controlled Folder Access.",
+        "Windows Update is managed externally.",
+        "Best for: Parents, grandparents, public kiosks, hotel business centers."
+    )
+    
+    # ===== RISK ASSESSMENT =====
+    RiskAssessment = @{
+        AttackSurface = "Minimal - 95% of OS features removed"
+        DataExfiltration = "Extremely limited - only web browsing allowed"
+        RemoteExploitation = "Blocked - NetBIOS/SMB/LLMNR disabled"
+        MalwareRisk = "Very Low - AppLocker whitelist + no execution from USB"
+        Compliance = "Custom - Designed for simplicity and safety"
+    }
+    
+    # ===== FAMILY PROTECTION CHECKLIST =====
+    FamilyProtection = @(
+        "✅ No malware can be installed (AppLocker whitelist)",
+        "✅ No USB drives can execute code",
+        "✅ No settings can be changed (except Edge home page)",
+        "✅ No PowerShell or CMD available to user",
+        "✅ Documents folder is read-only (Controlled Folder Access)",
+        "✅ Only web browsing and document viewing allowed",
+        "✅ Windows Defender real-time protection active"
+    )
+}

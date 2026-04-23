@@ -1,0 +1,381 @@
+# ============================================================================
+# Windows Factory - Quick Start Template: App-Dedicated (Business Application)
+# Language of the Land (LotL) Approach
+# ============================================================================
+# Anointing: "I anoint this Windows for [Business Application]"
+# Target: Small businesses, accounting firms, POS systems
+# Purpose: Single application server (Quickbooks, POS, etc.) - nothing else
+# ============================================================================
+
+@{
+    # ===== METADATA =====
+    TemplateName = "App-Dedicated: Business Application"
+    TemplateID = "appdedicated-001"
+    Version = "1.0.0"
+    Author = "Custom PC Republic"
+    Description = "Minimalist server for single business application. Only .NET runtime, database (if needed), and the target application installed. All other Windows components removed. Optimized for stability, performance, and security. Perfect for Quickbooks, POS terminals, or specialized line-of-business apps."
+    
+    # ===== COMPATIBILITY =====
+    TargetOS = @("Windows11-Pro", "Windows11-Enterprise", "Server2022", "Server2019")
+    MinimumOSVersion = "18000"
+    MinimumRAM = "2GB"
+    MinimumDisk = "40GB"
+    CISLevel = "Level2"
+    
+    # ===== TARGET APPLICATION =====
+    TargetApplication = @{
+        Name = "Business Application"
+        # Override this in your custom config
+        InstallerPath = ""
+        InstallerArgs = ""
+        RequiredPorts = @(80, 443)  # HTTP/HTTPS
+        Dependencies = @("dotnet", "sqlserver-express")
+    }
+    
+    # ===== COMPONENTS TO REMOVE (MAXIMAL) =====
+    RemoveComponents = @(
+        # EVERYTHING - keep only essentials
+        # Gaming
+        "Microsoft.XboxApp",
+        "Microsoft.XboxGameOverlay",
+        "Microsoft.XboxGamingOverlay",
+        "Microsoft.XboxIdentityProvider",
+        "Microsoft.MicrosoftSolitaireCollection",
+        
+        # Consumer Apps - ALL REMOVED
+        "Microsoft.WindowsFeedbackHub",
+        "Microsoft.GetHelp",
+        "Microsoft.Getstarted",
+        "Microsoft.BingNews",
+        "Microsoft.BingWeather",
+        "Microsoft.News",
+        "Microsoft.Office.OneNote",
+        "Microsoft.MicrosoftOfficeHub",
+        "Microsoft.OneDriveSync",
+        
+        # Cortana & Search
+        "Microsoft.549981C3F-5FF9-4253-8E46-2A91BA3E1C75",
+        "Microsoft.WindowsSearch",
+        
+        # Media - ALL REMOVED
+        "Microsoft.ZuneMusic",
+        "Microsoft.ZuneVideo",
+        "Microsoft.MediaPlayer",
+        
+        # Maps & Phone
+        "Microsoft.WindowsMaps",
+        "Microsoft.YourPhone",
+        
+        # Social
+        "Microsoft.SkypeApp",
+        
+        # Creative
+        "Microsoft.Paint3D",
+        "Microsoft.StickyNotes",
+        "Microsoft.Whiteboard",
+        
+        # To-Do
+        "Microsoft.Todos",
+        
+        # Edge (headless server may not need)
+        "Microsoft.MicrosoftEdge",
+        "Microsoft.Win32WebViewHost"
+    )
+    
+    # ===== WINDOWS FEATURES TO DISABLE =====
+    DisableWindowsFeatures = @(
+        "SMB1Protocol",
+        "TelnetClient",
+        "TFTP",
+        "Printing-Foundation-Features",
+        "Printing-Foundation-LLDS",
+        "FaxServicesClientPackage",
+        "RemoteDesktop",
+        "RemoteAssistance",
+        "WindowsSubsystemForLinux",
+        "HypervisorPlatform",
+        "VirtualMachinePlatform",
+        "Containers",
+        "IIS",
+        "IIS-Management",
+        "NetFx3",
+        "NetFx4",
+        "NetFxExt",
+        "WCF-HTTPActivation",
+        "WCF-NamedPipeActivation",
+        "Microsoft-Windows-Mobile-PC",
+        "ServerManager"
+    )
+    
+    # ===== SERVICES TO DISABLE (SERVER HARDENING) =====
+    DisableServices = @(
+        # Telemetry
+        @{Name="DiagTrack"; DisplayName="CEIP/Telemetry"; Risk="Privacy"},
+        @{Name="dmwappushservice"; DisplayName="Device Management"; Risk="Privacy"},
+        
+        # Remote - unless RDP needed
+        @{Name="RemoteRegistry"; DisplayName="Remote Registry"; Risk="Security"},
+        @{Name="RemoteAccess"; DisplayName="Remote Access"; Risk="Security"},
+        @{Name="SessionEnv"; DisplayName="Remote Desktop Services"; Risk="Unnecessary"},
+        
+        # File/Print - unless needed
+        @{Name="Spooler"; DisplayName="Print Spooler"; Risk="Not needed"},
+        @{Name="SSDPDiscovery"; DisplayName="SSDP Discovery"; Risk="Not needed"},
+        @{Name="UpnpHost"; DisplayName="UPnP Host"; Risk="Not needed"},
+        
+        # Network discovery - unless needed
+        @{Name="NetTcpPortSharing"; DisplayName="Net.Tcp Port Sharing"; Risk="Not needed"},
+        @{Name="BITS"; DisplayName="Background Intelligent Transfer"; Risk="Not needed"},
+        @{Name="FDResPub"; DisplayName="Function Discovery Resource Publication"; Risk="Not needed"},
+        @{Name="FDProxy"; DisplayName="Function Discovery Proxy"; Risk="Not needed"},
+        
+        # Xbox
+        @{Name="XblAuthManager"; DisplayName="Xbox Live"; Risk="Gaming"},
+        @{Name="XblGameSave"; DisplayName="Xbox Game Save"; Risk="Gaming"},
+        @{Name="xbgm"; DisplayName="Xbox Game Monitoring"; Risk="Gaming"},
+        
+        # Misc
+        @{Name="ScardSvr"; DisplayName="Smart Card"; Risk="Not needed"},
+        @{Name="ScDeviceEnum"; DisplayName="Smart Card Enumerator"; Risk="Not needed"},
+        @{Name="TapiSrv"; DisplayName="Telephony"; Risk="Not needed"},
+        @{Name="WdNisSvc"; DisplayName="Defender Network Inspection"; Risk="Not needed"},
+        
+        # Server Manager
+        @{Name="ServerManager"; DisplayName="Server Manager"; Risk="Not needed"}
+    )
+    
+    # ===== SERVICES TO KEEP (ESSENTIAL) =====
+    KeepServices = @(
+        "WinDefend",           # Windows Defender
+        "EventLog",           # Event logging
+        "EventSystem",        # COM+ Event System
+        "RpcSs",             # RPC Endpoint Mapper
+        "DcomLaunch",       # DCOM Server Process Launcher
+        "lsass",             # Local Security Authority
+        "services",          # Service Control Manager
+        "SamSs",             # Security Accounts Manager
+        "LanmanServer",      # Server (SMB, file sharing if needed)
+        "LanmanWorkstation", # Workstation (file access if needed)
+        "NetBT",             # NetBT (TCP/IP)
+        "Tcpip",             # TCP/IP Protocol Driver
+        "Dhcp",              # DHCP Client (if using DHCP)
+        "Dnscache",          # DNS Client
+        # Application-specific services will be added by PostInstallScripts
+    )
+    
+    # ===== SCHEDULED TASKS TO DISABLE =====
+    DisableScheduledTasks = @(
+        "\Microsoft\XblGameSave\Task",
+        "\Microsoft\Office\OfficeTelemetryAgentFallBack",
+        "\Microsoft\Office\OfficeTelemetryAgentFallBack2016",
+        "\Microsoft\Windows\WindowsUpdate\Automatic Update",
+        "\Microsoft\Windows\Windows Defender\Windows Defender Scheduled Scan",
+        "\Microsoft\Windows\Windows Defender\Windows Defender Cleanup",
+        "\Microsoft\Windows\ServerManager\ConfigReminder"
+    )
+    
+    # ===== NETWORK CONFIGURATION =====
+    NetworkConfig = @{
+        # Static IP recommended for servers
+        UseDHCP = $true  # Override for static
+        
+        # Disable NetBIOS (critical for security)
+        DisableNetBIOS = $true
+        
+        # Disable LLMNR (critical for security)
+        DisableLLMNR = $true
+        
+        # Disable SMB completely (unless file sharing needed)
+        DisableSMBv1 = $true
+        DisableSMBv2 = $false  # Keep for internal file sharing if needed
+        
+        # Firewall - block all inbound except app ports
+        EnableFirewall = $true
+        DefaultInbound = "Block"
+        DefaultOutbound = "Allow"
+    }
+    
+    # ===== FIREWALL RULES =====
+    FirewallRules = @(
+        # Application ports (customize for your app)
+        @{Name="Allow-App-In"; Direction="Inbound"; Protocol="TCP"; LocalPort="80,443"; Action="Allow"; Profile="Any"; Description="Business Application"},
+        
+        # Allow RDP if needed for management
+        # @{Name="Allow-RDP-In"; Direction="Inbound"; Protocol="TCP"; LocalPort="3389"; Action="Allow"; Profile="Private"; Description="RDP for management"},
+        
+        # Block everything else
+        @{Name="Block-All-In"; Direction="Inbound"; Protocol="Any"; Action="Block"; Profile="Any"; Description="Block all other inbound"},
+        
+        # Block NetBIOS
+        @{Name="Block-NetBIOS-In"; Direction="Inbound"; Protocol="UDP"; LocalPort="137-139"; Action="Block"; Profile="Any"; Description="Block NetBIOS"},
+        
+        # Block SMB from public
+        @{Name="Block-SMB-Public"; Direction="Inbound"; Protocol="TCP"; LocalPort="445"; Action="Block"; Profile="Public"; Description="Block SMB from public networks"}
+    )
+    
+    # ===== REGISTRY HARDENING =====
+    RegistryHardening = @(
+        # Disable SMBv1
+        @{
+            Path = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
+            Name = "SMB1"
+            Value = 0
+            Type = "DWord"
+            Description = "Disable SMBv1 protocol"
+            CIS = "9.1.1"
+        },
+        
+        # Disable NetBIOS over TCP/IP
+        @{
+            Path = "HKLM:\System\CurrentControlSet\Services\NetBT\Parameters"
+            Name = "NetbiosOptions"
+            Value = 2
+            Type = "DWord"
+            Description = "Disable NetBIOS over TCP/IP"
+        },
+        
+        # Disable LLMNR
+        @{
+            Path = "HKLM:\Software\policies\Microsoft\Windows NT\DNSClient"
+            Name = "EnableMulticast"
+            Value = 0
+            Type = "DWord"
+            Description = "Disable LLMNR"
+        },
+        
+        # Windows Defender - ensure enabled
+        @{
+            Path = "HKLM:\Software\Policies\Microsoft\Windows Defender"
+            Name = "DisableAntiSpyware"
+            Value = 0
+            Type = "DWord"
+            Description = "Ensure Windows Defender is enabled"
+        },
+        
+        # Audit logon events
+        @{
+            Path = "HKLM:\Software\Policies\Microsoft\Windows\Audit"
+            Name = "AuditLogonEvents"
+            Value = 3
+            Type = "DWord"
+            Description = "Audit logon events"
+        }
+    )
+    
+    # ===== APPLICATION INSTALLATION =====
+    PreInstallApps = @(
+        # .NET Framework (required for most business apps)
+        @{
+            Name = ".NET Framework"
+            Source = "WindowsFeature"
+            FeatureName = "NET-Framework-Core"
+        },
+        
+        # SQL Server Express (uncomment if needed for database)
+        # @{
+        #     Name = "SQLServerExpress"
+        #     Installer = "C:\Factory\SQLServerExpress.exe"
+        #     Args = "/QS /IACCEPTSQLSERVERLICENSETERMS /SAPWD=YourStrongPassword /SecurityMode=SQL"
+        #     Required = $false
+        # }
+    )
+    
+    PostInstallScripts = @(
+        # Install target business application
+        @{
+            Name = "Install-BusinessApplication"
+            Script = "Install-TargetApplication"
+            # Script should reference TargetApplication config
+            Condition = "If installer provided"
+        },
+        
+        # Configure automatic startup
+        @{
+            Name = "Configure-AutoStart"
+            Script = "Set-ServiceAutoStart"
+            Condition = "Always"
+        },
+        
+        # Disable Windows Update for stability (optional - managed separately)
+        @{
+            Name = "Configure-WindowsUpdate"
+            Script = "Set-WindowsUpdate-Manual"
+            Condition = "Optional"
+        }
+    )
+    
+    # ===== PERFORMANCE OPTIMIZATION =====
+    PerformanceTuning = @{
+        # Disable visual effects
+        DisableVisualEffects = $true
+        
+        # Disable indexing (save disk/CPU)
+        DisableSearchIndexing = $true
+        
+        # Disable scheduled defrag
+        DisableDefrag = $true
+        
+        # Disable superfetch
+        DisableSuperfetch = $true
+        
+        # Set power plan to High Performance
+        PowerPlan = "HighPerformance"
+        
+        # Disable sleep (servers don't sleep)
+        DisableSleep = $true
+        
+        # Clear pagefile on shutdown (security)
+        ClearPageFileOnShutdown = $false  # Set to true for higher security
+    }
+    
+    # ===== BACKUP & RECOVERY =====
+    RecoveryConfig = @{
+        # Enable System Restore
+        EnableSystemRestore = $false  # Not needed - use image backup instead
+        
+        # Recovery partition
+        CreateRecoveryPartition = $true
+        
+        # WinRE image
+        EnableWinRE = $true
+    }
+    
+    # ===== COMPLIANCE MAPPING =====
+    Compliance = @{
+        CIS = @("2.1.1", "3.1.1", "4.1.1", "5.1.1", "8.1.1", "9.1.1")
+        NIST = @("AC-2", "SC-4", "SC-5", "SC-7", "SC-8", "SI-2", "SI-3")
+        SOC2 = @("CC6.1", "CC6.2", "CC7.2")
+        GDPR = @("32")
+    }
+    
+    # ===== USAGE NOTES =====
+    UsageNotes = @(
+        "This template is for single-purpose business application servers.",
+        "Customize TargetApplication section for your specific app.",
+        "All unnecessary Windows components are removed.",
+        "Only essential services are enabled.",
+        "Firewall blocks all inbound except application ports.",
+        "Perfect for: Quickbooks server, POS terminal, pharmacy system, dental software, etc.",
+        "Update FirewallRules to match your application ports."
+    )
+    
+    # ===== RISK ASSESSMENT =====
+    RiskAssessment = @{
+        AttackSurface = "Minimal - Only application ports open"
+        DataExfiltration = "Blocked - Only application traffic allowed"
+        RemoteExploitation = "Blocked - SMB/NetBIOS/LLMNR disabled"
+        MalwareRisk = "Very Low - No unnecessary code installed"
+        Compliance = "High - CIS Level 2 aligned"
+        Stability = "High - Minimal OS footprint = fewer updates, fewer reboots"
+    }
+    
+    # ===== CUSTOMIZATION CHECKLIST =====
+    CustomizationRequired = @(
+        "Set TargetApplication.Name to your application",
+        "Set TargetApplication.InstallerPath to your installer",
+        "Update FirewallRules with application ports",
+        "Update PreInstallApps if SQL Server needed",
+        "Configure NetworkConfig.UseDHCP for your environment",
+        "Review PostInstallScripts for your application"
+    )
+}

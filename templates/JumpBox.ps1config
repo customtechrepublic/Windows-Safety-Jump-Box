@@ -1,0 +1,309 @@
+# ============================================================================
+# Windows Factory - Quick Start Template: Secure Jump Box
+# Language of the Land (LotL) Approach
+# ============================================================================
+# Anointing: "I anoint this Windows for Network Administration"
+# Target: Network administrators, infrastructure engineers
+# Purpose: SSH/RDP management of servers and network equipment
+# ============================================================================
+
+@{
+    # ===== METADATA =====
+    TemplateName = "Secure Jump Box"
+    TemplateID = "jumpbox-001"
+    Version = "1.0.0"
+    Author = "Custom PC Republic"
+    Description = "Network administration workstation. Hardened for remote management via SSH/RDP. Includes PuTTY, Remote Desktop, PowerShell. All consumer bloatware and non-essential services removed. AppLocker whitelist enforces only approved binaries."
+    
+    # ===== COMPATIBILITY =====
+    TargetOS = @("Windows11-Pro", "Windows11-Enterprise", "Server2022")
+    MinimumOSVersion = "22000"
+    MinimumRAM = "4GB"
+    CISLevel = "Level2"
+    
+    # ===== COMPONENTS TO REMOVE =====
+    RemoveComponents = @(
+        # Xbox Gaming
+        "Microsoft.XboxApp",
+        "Microsoft.XboxGameOverlay",
+        "Microsoft.XboxGamingOverlay",
+        "Microsoft.XboxIdentityProvider",
+        
+        # Consumer Info Apps
+        "Microsoft.WindowsFeedbackHub",
+        "Microsoft.GetHelp",
+        "Microsoft.Getstarted",
+        "Microsoft.BingNews",
+        "Microsoft.BingWeather",
+        "Microsoft.News",
+        
+        # Cortana & Search
+        "Microsoft.549981C3F-5FF9-4253-8E46-2A91BA3E1C75",  # Cortana
+        "Microsoft.WindowsSearch",
+        
+        # Consumer Media
+        "Microsoft.ZuneMusic",
+        "Microsoft.ZuneVideo",
+        "Microsoft.MediaPlayer",
+        
+        # Office Hub
+        "Microsoft.MicrosoftOfficeHub",
+        "Microsoft.Office.OneNote",
+        
+        # OneDrive
+        "Microsoft.OneDriveSync",
+        
+        # Solitaire
+        "Microsoft.MicrosoftSolitaireCollection",
+        
+        # Maps
+        "Microsoft.WindowsMaps",
+        
+        # Phone Companion
+        "Microsoft.YourPhone",
+        
+        # Skype
+        "Microsoft.SkypeApp",
+        
+        # Paint 3D
+        "Microsoft.Paint3D",
+        
+        # Sticky Notes
+        "Microsoft.StickyNotes",
+        
+        # Whiteboard
+        "Microsoft.Whiteboard",
+        
+        # To-Do
+        "Microsoft.Todos"
+    )
+    
+    # ===== WINDOWS FEATURES TO DISABLE =====
+    DisableWindowsFeatures = @(
+        "TelnetClient",
+        "TFTP",
+        "SMB1Protocol",
+        "Printing-Foundation-Features",
+        "FaxServicesClientPackage"
+    )
+    
+    # ===== SERVICES TO DISABLE =====
+    DisableServices = @(
+        @{Name="DiagTrack"; DisplayName="DiagTrack (CEIP/Connected User Experience)"; Risk="Telemetry"},
+        @{Name="dmwappushservice"; DisplayName="Device Management Wireless Application Protocol"; Risk="Telemetry"},
+        @{Name="RemoteRegistry"; DisplayName="Remote Registry"; Risk="Remote attack vector"},
+        @{Name="RemoteAccess"; DisplayName="Remote Access (RAS)"; Risk="Unnecessary service"},
+        @{Name="SCardSvr"; DisplayName="Smart Card"; Risk="Not needed for jump box"},
+        @{Name="ScDeviceEnum"; DisplayName="Smart Card Device Enumerator"; Risk="Not needed"},
+        @{Name="Fax"; DisplayName="Fax Service"; Risk="Legacy, unused"},
+        @{Name="TapiSrv"; DisplayName="Telephony API"; Risk="Unnecessary"},
+        @{Name="XblAuthManager"; DisplayName="Xbox Live Auth"; Risk="Gaming, unnecessary"},
+        @{Name="XblGameSave"; DisplayName="Xbox Live Game Save"; Risk="Gaming"},
+        @{Name="xbgm"; DisplayName="Xbox Game Monitoring"; Risk="Gaming"},
+        @{Name="WdNisSvc"; DisplayName="Windows Defender Network Inspection Service"; Risk="Use MDE instead"},
+        @{Name="Spooler"; DisplayName="Print Spooler"; Risk="Attack vector if not printing"}
+    )
+    
+    # ===== SCHEDULED TASKS TO DISABLE =====
+    DisableScheduledTasks = @(
+        "\Microsoft\XblGameSave\Task",
+        "\Microsoft\Office\OfficeTelemetryAgentFallBack",
+        "\Microsoft\Office\OfficeTelemetryAgentFallBack2016"
+    )
+    
+    # ===== APPLOCKER POLICY (WHITELIST MODE) =====
+    EnableAppLocker = $true
+    AppLockerMode = "Whitelist"
+    
+    # Allowed executables (whitelist)
+    AppLockerAllowList = @(
+        # Windows System (required)
+        "C:\Windows\System32\*.exe",
+        "C:\Windows\SysWOW64\*.exe",
+        "C:\Program Files\Windows Defender\*.exe",
+        
+        # PowerShell (essential)
+        "C:\Windows\System32\WindowsPowerShell\v1.0\*.exe",
+        "C:\Program Files\PowerShell\7\*.exe",
+        
+        # Network Admin Tools
+        "C:\Program Files\PuTTY\*.exe",
+        "C:\Program Files (x86)\PuTTY\*.exe",
+        "C:\Windows\System32\mstsc.exe",  # RDP
+        "C:\Windows\System32\cmd.exe",
+        
+        # Microsoft Office (if needed)
+        "C:\Program Files\Microsoft Office\*.exe",
+        "C:\Program Files (x86)\Microsoft Office\*.exe",
+        
+        # Text editors
+        "C:\Windows\System32\notepad.exe",
+        "C:\Program Files\Notepad++\*.exe",
+        
+        # Browsers (optional - restrict to IT-approved versions)
+        "C:\Program Files (x86)\Microsoft\Edge\Application\*.exe"
+    )
+    
+    # Denied locations (blacklist)
+    AppLockerDenyList = @(
+        "D:\*.exe",  # USB drives
+        "E:\*.exe",
+        "F:\*.exe",
+        "C:\Temp\*.exe",
+        "%TEMP%\*.exe",
+        "%APPDATA%\*.exe",
+        "%LOCALAPPDATA%\*.exe"
+    )
+    
+    # ===== NETWORK HARDENING =====
+    NetworkPolicies = @{
+        DisableNetBIOS = $true
+        DisableLLMNR = $true
+        DisableSMBv1 = $true
+        DisableSMBv2 = $false  # Keep v2 for file sharing if needed
+        DisableRemoteAssistance = $true
+        DisableRemoteDesktop = $false  # Allow RDP (this IS a jump box after all)
+        BlockInboundICMP = $true
+        EnableFirewall = $true
+        DefaultOutboundAction = "Allow"  # Can be changed to Block for higher security
+    }
+    
+    # ===== REGISTRY HARDENING =====
+    RegistryHardening = @(
+        # UAC
+        @{
+            Path = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System"
+            Name = "EnableLUA"
+            Value = 1
+            Type = "DWord"
+            Description = "Enable User Account Control"
+            CIS = "1.1.1"
+        },
+        @{
+            Path = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System"
+            Name = "ConsentPromptBehaviorAdmin"
+            Value = 2
+            Type = "DWord"
+            Description = "Prompt for credentials on admin elevation"
+            CIS = "1.1.2"
+        },
+        
+        # SMB Hardening
+        @{
+            Path = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
+            Name = "SMB1"
+            Value = 0
+            Type = "DWord"
+            Description = "Disable SMBv1 protocol"
+            CIS = "9.1.1"
+        },
+        @{
+            Path = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
+            Name = "RequireSecuritySignature"
+            Value = 1
+            Type = "DWord"
+            Description = "Require SMB signing"
+            CIS = "9.2.1"
+        },
+        
+        # LLMNR
+        @{
+            Path = "HKLM:\Software\policies\Microsoft\Windows NT\DNSClient"
+            Name = "EnableMulticast"
+            Value = 0
+            Type = "DWord"
+            Description = "Disable LLMNR"
+            CIS = "8.2.1"
+        },
+        
+        # Windows Defender (ensure enabled)
+        @{
+            Path = "HKLM:\Software\Policies\Microsoft\Windows Defender"
+            Name = "DisableAntiSpyware"
+            Value = 0
+            Type = "DWord"
+            Description = "Ensure Windows Defender is enabled"
+            CIS = "3.1.1"
+        }
+    )
+    
+    # ===== AUDIT POLICIES TO ENABLE =====
+    EnableAuditPolicies = @(
+        @{Category="Logon/Logoff"; Subcategory="Logon"; Setting="Success and Failure"},
+        @{Category="Logon/Logoff"; Subcategory="Logoff"; Setting="Success"},
+        @{Category="Account Logon"; Subcategory="Credential Validation"; Setting="Success and Failure"},
+        @{Category="Object Access"; Subcategory="File System"; Setting="Success"},
+        @{Category="Privilege Use"; Subcategory="Sensitive Privilege Use"; Setting="Success and Failure"},
+        @{Category="Detailed Tracking"; Subcategory="Process Creation"; Setting="Success"},
+        @{Category="Policy Change"; Subcategory="Audit Policy Change"; Setting="Success"},
+        @{Category="Account Management"; Subcategory="User Account Management"; Setting="Success"}
+    )
+    
+    # ===== FIREWALL RULES =====
+    FirewallRules = @(
+        # Inbound rules for management
+        @{Name="RDP-In"; Direction="Inbound"; Protocol="TCP"; LocalPort="3389"; Action="Allow"; Profile="Private"; Description="Allow RDP"},
+        @{Name="SSH-In"; Direction="Inbound"; Protocol="TCP"; LocalPort="22"; Action="Allow"; Profile="Private"; Description="Allow SSH"},
+        
+        # Block risky inbound
+        @{Name="Block-NetBIOS-In"; Direction="Inbound"; Protocol="UDP"; LocalPort="137-139"; Action="Block"; Profile="Any"; Description="Block NetBIOS"},
+        @{Name="Block-LLMNR-In"; Direction="Inbound"; Protocol="UDP"; LocalPort="5355"; Action="Block"; Profile="Any"; Description="Block LLMNR"},
+        @{Name="Block-SMB-In"; Direction="Inbound"; Protocol="TCP"; LocalPort="445"; Action="Block"; Profile="Public"; Description="Block SMB from public"}
+    )
+    
+    # ===== BITLOCKER SETTINGS =====
+    EnableBitLocker = $true
+    BitLockerMode = "TPM"
+    BitLockerRecovery = "RecoveryKeyInAD"
+    
+    # ===== CREDENTIAL GUARD =====
+    EnableCredentialGuard = $true
+    
+    # ===== WINDOWS DEFENDER =====
+    EnableWindowsDefender = $true
+    DefenderSettings = @{
+        RealtimeProtection = $true
+        BehaviorMonitoring = $true
+        CloudProtection = $true
+        NetworkProtection = "Enabled"
+        ControlledFolderAccess = "Enabled"
+        PUAProtection = "Enabled"
+    }
+    
+    # ===== POST-INSTALL SCRIPTS =====
+    PostInstallScripts = @(
+        # Install PuTTY if not present
+        @{
+            Name = "Ensure-PuTTY"
+            Script = "winget install PuTTY.PuTTY --silent --accept-package-agreements --accept-source-agreements"
+            Condition = "If not present"
+        }
+    )
+    
+    # ===== COMPLIANCE MAPPING =====
+    Compliance = @{
+        CIS = @("2.1.1", "2.2.1", "3.1.1", "3.2.1", "4.1.1", "4.2.1", "5.1.1", "5.2.1", "6.1.1", "7.1.1", "8.1.1", "9.1.1", "9.2.1")
+        NIST = @("AC-2", "AC-3", "AU-2", "AU-3", "IA-5", "SC-4", "SC-5", "SC-7", "SC-8", "SI-2", "SI-3", "SI-4")
+        SOC2 = @("CC6.1", "CC6.2", "CC7.2")
+        GDPR = @("32", "33")
+    }
+    
+    # ===== USAGE NOTES =====
+    UsageNotes = @(
+        "This template is optimized for network administrators.",
+        "PuTTY and Remote Desktop are the primary tools.",
+        "All other application execution is blocked via AppLocker.",
+        "USB drives are blocked from executing code.",
+        "Windows Defender provides real-time protection.",
+        "All network management ports are controlled via Windows Firewall."
+    )
+    
+    # ===== RISK ASSESSMENT =====
+    RiskAssessment = @{
+        AttackSurface = "Minimal - Only essential services enabled"
+        DataExfiltration = "Blocked via AppLocker and firewall rules"
+        RemoteExploitation = "Hardened via SMB/NetBIOS disable"
+        MalwareRisk = "Low - AppLocker whitelist prevents unsigned executables"
+        Compliance = "High - CIS Level 2 aligned"
+    }
+}

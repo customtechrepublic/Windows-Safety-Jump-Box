@@ -1,0 +1,391 @@
+# ============================================================================
+# Windows Factory - Quick Start Template: Dev-Hardened
+# Language of the Land (LotL) Approach
+# ============================================================================
+# Anointing: "I anoint this Windows for Secure Development"
+# Target: Developers, DevOps engineers, security researchers
+# Purpose: Secure development workstation with tooling, but no telemetry/bloat
+# ============================================================================
+
+@{
+    # ===== METADATA =====
+    TemplateName = "Dev-Hardened"
+    TemplateID = "devhardened-001"
+    Version = "1.0.0"
+    Author = "Custom PC Republic"
+    Description = "Secure development workstation. VS Code, Git, WSL2, Docker, and essential tooling. All consumer bloatware, Xbox, OneDrive, and telemetry removed. CIS Level 1 hardening applied. Optimized for developer productivity without security compromise."
+    
+    # ===== COMPATIBILITY =====
+    TargetOS = @("Windows11-Pro", "Windows11-Enterprise")
+    MinimumOSVersion = "22000"
+    MinimumRAM = "16GB"
+    MinimumDisk = "100GB"
+    CISLevel = "Level1"
+    
+    # ===== COMPONENTS TO REMOVE =====
+    RemoveComponents = @(
+        # Gaming
+        "Microsoft.XboxApp",
+        "Microsoft.XboxGameOverlay",
+        "Microsoft.XboxGamingOverlay",
+        "Microsoft.XboxIdentityProvider",
+        "Microsoft.MicrosoftSolitaireCollection",
+        
+        # Consumer Apps
+        "Microsoft.WindowsFeedbackHub",
+        "Microsoft.GetHelp",
+        "Microsoft.Getstarted",
+        "Microsoft.BingNews",
+        "Microsoft.BingWeather",
+        "Microsoft.News",
+        "Microsoft.Office.OneNote",
+        "Microsoft.MicrosoftOfficeHub",
+        
+        # Cortana & Search
+        "Microsoft.549981C3F-5FF9-4253-8E46-2A91BA3E1C75",
+        "Microsoft.WindowsSearch",
+        
+        # Media
+        "Microsoft.ZuneMusic",
+        "Microsoft.ZuneVideo",
+        
+        # Cloud
+        "Microsoft.OneDriveSync",
+        
+        # Maps
+        "Microsoft.WindowsMaps",
+        
+        # Phone
+        "Microsoft.YourPhone",
+        
+        # Skype
+        "Microsoft.SkypeApp",
+        
+        # Creative
+        "Microsoft.Paint3D",
+        "Microsoft.StickyNotes",
+        
+        # To-Do
+        "Microsoft.Todos"
+    )
+    
+    # ===== WINDOWS FEATURES TO ENABLE (FOR DEV) =====
+    EnableWindowsFeatures = @(
+        "Microsoft-Windows-Subsystem-Linux",        # WSL2
+        "VirtualMachinePlatform",                   # Hyper-V
+        "HypervisorPlatform",                       # Hyper-V
+        "Containers",                               # Docker
+        "Microsoft-Hyper-V-All",                    # Hyper-V
+        "Microsoft-Hyper-V-Management-PowerShell",   # Hyper-V management
+        "NetFx3",                                  # .NET 3.5
+        "NetFx4",                                  # .NET 4.x
+        "IIS-Management",                           # IIS management (optional)
+        "WorkFolders-Client"                       # Work folders
+    )
+    
+    # ===== WINDOWS FEATURES TO DISABLE =====
+    DisableWindowsFeatures = @(
+        "SMB1Protocol",
+        "TelnetClient",
+        "TFTP",
+        "Printing-Foundation-Features",
+        "FaxServicesClientPackage"
+    )
+    
+    # ===== SERVICES TO DISABLE =====
+    DisableServices = @(
+        # Telemetry
+        @{Name="DiagTrack"; DisplayName="CEIP/Telemetry"; Risk="Privacy"},
+        @{Name="dmwappushservice"; DisplayName="Device Management"; Risk="Privacy"},
+        
+        # Remote
+        @{Name="RemoteRegistry"; DisplayName="Remote Registry"; Risk="Security"},
+        @{Name="RemoteAccess"; DisplayName="Remote Access"; Risk="Security"},
+        
+        # Xbox
+        @{Name="XblAuthManager"; DisplayName="Xbox Live"; Risk="Gaming"},
+        @{Name="XblGameSave"; DisplayName="Xbox Game Save"; Risk="Gaming"},
+        @{Name="xbgm"; DisplayName="Xbox Game Monitoring"; Risk="Gaming"},
+        
+        # Misc
+        @{Name="Spooler"; DisplayName="Print Spooler"; Risk="Not needed"}
+    )
+    
+    # ===== SERVICES TO KEEP (FOR DEV) =====
+    KeepServices = @(
+        # Development
+        "WinDefend",           # Security
+        "EventLog",           # Logging
+        "WSearch",           # Windows Search (useful for devs)
+        "wuauserv",          # Windows Update
+        "BITS",              # Background Intelligent Transfer (for Winget)
+        
+        # Virtualization
+        "vmcompute",         # WSL2/Docker
+        "vmms",              # Hyper-V
+        "MSiSCSI",           # iSCSI (if needed)
+        
+        # Network
+        "Dnscache",          # DNS Client
+        "Dhcp",              # DHCP
+        "NetBT",             # NetBT
+        "Tcpip"              # TCP/IP
+    )
+    
+    # ===== SCHEDULED TASKS TO DISABLE =====
+    DisableScheduledTasks = @(
+        "\Microsoft\XblGameSave\Task",
+        "\Microsoft\Office\OfficeTelemetryAgentFallBack"
+    )
+    
+    # ===== DEV TOOLS TO INSTALL =====
+    DevTools = @{
+        # Package Manager
+        UseWinget = $true
+        
+        # IDE
+        InstallVSCode = $true
+        InstallVisualStudio = $false  # Heavy, optional
+        
+        # Version Control
+        InstallGit = $true
+        InstallGitHubCLI = $true
+        
+        # Container
+        InstallDocker = $true
+        InstallKubernetes = $false  # Optional
+        
+        # CLI Tools
+        InstallPowerShell7 = $true
+        InstallWindowsTerminal = $true
+        
+        # Cloud CLI
+        InstallAzureCLI = $true
+        InstallAWSSCLI = $false  # Optional
+        InstallGCloudCLI = $false  # Optional
+        
+        # Scripting
+        InstallPython = $false  # Optional
+        InstallNodeJS = $false  # Optional
+        
+        # Security
+        InstallSysinternals = $true
+        InstallNmap = $false  # Optional
+        InstallWireshark = $false  # Optional
+    }
+    
+    # ===== APPLOCKER POLICY (DEV MODE) =====
+    EnableAppLocker = $false  # Disabled for dev flexibility - use Windows Defender instead
+    
+    # ===== NETWORK HARDENING =====
+    NetworkPolicies = @{
+        DisableNetBIOS = $true
+        DisableLLMNR = $true
+        DisableSMBv1 = $true
+        DisableSMBv2 = $false  # Keep for file sharing
+        DisableRemoteAssistance = $true
+        DisableRemoteDesktop = $false  # Allow RDP for support
+        EnableFirewall = $true
+        DefaultOutboundAction = "Allow"
+    }
+    
+    # ===== FIREWALL RULES =====
+    FirewallRules = @(
+        # Development ports
+        @{Name="Allow-Docker-In"; Direction="Inbound"; Protocol="TCP"; LocalPort="2375,2376"; Action="Allow"; Profile="Private"; Description="Docker"},
+        @{Name="Allow-VSCode-In"; Direction="Inbound"; Protocol="TCP"; LocalPort="5000-5100"; Action="Allow"; Profile="Private"; Description="VS Code Live Share"},
+        
+        # Block NetBIOS
+        @{Name="Block-NetBIOS-In"; Direction="Inbound"; Protocol="UDP"; LocalPort="137-139"; Action="Block"; Profile="Any"; Description="Block NetBIOS"},
+        
+        # Block LLMNR
+        @{Name="Block-LLMNR-In"; Direction="Inbound"; Protocol="UDP"; LocalPort="5355"; Action="Block"; Profile="Any"; Description="Block LLMNR"}
+    )
+    
+    # ===== REGISTRY HARDENING =====
+    RegistryHardening = @(
+        # Disable telemetry
+        @{
+            Path = "HKLM:\Software\Policies\Microsoft\Windows\DataCollection"
+            Name = "AllowTelemetry"
+            Value = 0
+            Type = "DWord"
+            Description = "Disable telemetry"
+        },
+        
+        # Disable feedback
+        @{
+            Path = "HKLM:\Software\Policies\Microsoft\Windows\CloudContent"
+            Name = "DisableWindowsConsumerFeatures"
+            Value = 1
+            Type = "DWord"
+            Description = "Disable consumer features"
+        },
+        
+        # Disable OneDrive
+        @{
+            Path = "HKLM:\Software\Policies\Microsoft\Windows\OneDrive"
+            Name = "DisableFileSyncNGSC"
+            Value = 1
+            Type = "DWord"
+            Description = "Disable OneDrive"
+        },
+        
+        # SMBv1 disable
+        @{
+            Path = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
+            Name = "SMB1"
+            Value = 0
+            Type = "DWord"
+            Description = "Disable SMBv1"
+        },
+        
+        # LLMNR disable
+        @{
+            Path = "HKLM:\Software\policies\Microsoft\Windows NT\DNSClient"
+            Name = "EnableMulticast"
+            Value = 0
+            Type = "DWord"
+            Description = "Disable LLMNR"
+        }
+    )
+    
+    # ===== DEVELOPMENT ENVIRONMENT =====
+    DevEnvironment = @{
+        # Terminal
+        TerminalFont = "Cascadia Code"
+        TerminalTheme = "Dark"
+        
+        # PowerShell
+        PowerShellProfile = $true
+        PowerShellModules = @(
+            "Posh-Git",
+            "oh-My-Posh",
+            "PSReadLine"
+        )
+        
+        # Git
+        GitConfig = @{
+            DefaultBranch = "main"
+            PullRebase = $true
+            AutoCrLf = "input"
+        }
+        
+        # VS Code
+        VSCodeExtensions = @(
+            "ms-vscode.powershell",
+            "ms-python.python",
+            "ms-azuretools.vscode-docker",
+            "eamodio.gitlens",
+            "esbenp.prettier-vscode"
+        )
+        
+        # WSL
+        WSLDistro = "Ubuntu-22.04"
+    }
+    
+    # ===== AUDIT POLICIES =====
+    EnableAuditPolicies = @(
+        @{Category="Logon/Logoff"; Subcategory="Logon"; Setting="Success and Failure"},
+        @{Category="Detailed Tracking"; Subcategory="Process Creation"; Setting="Success"},
+        @{Category="Detailed Tracking"; Subcategory="Process Termination"; Setting="Success"},
+        @{Category="Object Access"; Subcategory="File System"; Setting="Success"},
+        @{Category="Privilege Use"; Subcategory="Sensitive Privilege Use"; Setting="Success and Failure"}
+    )
+    
+    # ===== WINDOWS DEFENDER EXCLUSIONS =====
+    DefenderExclusions = @(
+        "C:\Program Files\Docker",
+        "C:\ProgramData\Docker",
+        "C:\Program Files\Git",
+        "C:\Program Files\PowerShell\7",
+        "C:\Users\*\AppData\Local\Packages\*\LocalState"
+    )
+    
+    # ===== POST-INSTALL SCRIPTS =====
+    PostInstallScripts = @(
+        # Install Git
+        @{
+            Name = "Install-Git"
+            Script = "winget install Git.Git --silent --accept-package-agreements --accept-source-agreements"
+            Condition = "If DevTools.InstallGit"
+        },
+        
+        # Install VS Code
+        @{
+            Name = "Install-VSCode"
+            Script = "winget install Microsoft.VisualStudioCode --silent --accept-package-agreements --accept-source-agreements"
+            Condition = "If DevTools.InstallVSCode"
+        },
+        
+        # Install PowerShell 7
+        @{
+            Name = "Install-PowerShell7"
+            Script = "winget install Microsoft.PowerShell --silent --accept-package-agreements --accept-source-agreements"
+            Condition = "If DevTools.InstallPowerShell7"
+        },
+        
+        # Install Windows Terminal
+        @{
+            Name = "Install-WindowsTerminal"
+            Script = "winget install Microsoft.WindowsTerminal --silent --accept-package-agreements --accept-source-agreements"
+            Condition = "If DevTools.InstallWindowsTerminal"
+        },
+        
+        # Install Docker Desktop
+        @{
+            Name = "Install-Docker"
+            Script = "winget install Docker.DockerDesktop --silent --accept-package-agreements --accept-source-agreements"
+            Condition = "If DevTools.InstallDocker"
+        },
+        
+        # Install Azure CLI
+        @{
+            Name = "Install-AzureCLI"
+            Script = "winget install Microsoft.AzureCLI --silent --accept-package-agreements --accept-source-agreements"
+            Condition = "If DevTools.InstallAzureCLI"
+        },
+        
+        # Configure Git
+        @{
+            Name = "Configure-Git"
+            Script = "git config --global init.defaultBranch main; git config --global pull.rebase true"
+            Condition = "Always"
+        },
+        
+        # Download Sysinternals
+        @{
+            Name = "Get-Sysinternals"
+            Script = "Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SysinternalsSuite.zip' -OutFile 'C:\Tools\SysinternalsSuite.zip'; Expand-Archive 'C:\Tools\SysinternalsSuite.zip' -DestinationPath 'C:\Tools\Sysinternals' -Force"
+            Condition = "If DevTools.InstallSysinternals"
+        }
+    )
+    
+    # ===== COMPLIANCE MAPPING =====
+    Compliance = @{
+        CIS = @("2.1.1", "3.1.1", "4.1.1", "5.1.1", "9.1.1")
+        NIST = @("AC-2", "AU-2", "SC-4", "SC-5", "SI-3")
+        SOC2 = @("CC6.1", "CC7.2")
+        GDPR = @("32")
+    }
+    
+    # ===== USAGE NOTES =====
+    UsageNotes = @(
+        "This template is for developers who need tooling but want security.",
+        "All telemetry, Xbox, and consumer apps removed.",
+        "Dev tools installed via Winget (Git, VS Code, Docker, etc.).",
+        "WSL2 and Hyper-V enabled for container development.",
+        "Windows Defender exclusions configured for dev tools.",
+        "Perfect for: Software developers, DevOps engineers, security researchers."
+    )
+    
+    # ===== RISK ASSESSMENT =====
+    RiskAssessment = @{
+        AttackSurface = "Medium - Dev tools add attack surface, but minimized"
+        DataExfiltration = "Medium - Dev tools can exfiltrate, monitored by Defender"
+        RemoteExploitation = "Low - SMB/NetBIOS/LLMNR disabled"
+        MalwareRisk = "Medium - Dev tools are common malware targets"
+        Compliance = "High - CIS Level 1 aligned"
+        Productivity = "High - All dev tools available"
+    }
+}

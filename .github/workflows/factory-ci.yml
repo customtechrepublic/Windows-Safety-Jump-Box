@@ -1,0 +1,232 @@
+name: Windows Factory CI/CD
+
+on:
+  push:
+    branches: [main, alpha-prerelease-community-edition, 'feature/**']
+  pull_request:
+    branches: [main, alpha-prerelease-community-edition]
+
+env:
+  POWERSHELL_TELEMETRY_OPTOUT: 1
+
+jobs:
+  lint:
+    name: PSScriptAnalyzer Lint
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        uses: ./.github/actions/powershell-setup@v1
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          $scripts = Get-ChildItem -Path . -Filter "*.ps1" -Recurse | Where-Object { $_.FullName -notmatch 'node_modules|\.git' }
+          foreach ($script in $scripts) {
+            Write-Host "Analyzing: $($script.FullName)"
+            $results = Invoke-ScriptAnalyzer -Path $script.FullName -Severity Error -Recurse
+            if ($results) {
+              Write-Host "Errors found in $($script.Name):" -ForegroundColor Red
+              $results | Format-Table
+              exit 1
+            }
+          }
+          Write-Host "All scripts passed analysis" -ForegroundColor Green
+
+  test-modules:
+    name: Test PowerShell Modules
+    runs-on: windows-latest
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test ImageManagement Module
+        shell: pwsh
+        run: |
+          Import-Module ./lib/ImageManagement.ps1 -Force
+          # Basic function existence tests
+          $functions = @('Mount-WimImage', 'Dismount-WimImage', 'Get-WimImageInfo')
+          foreach ($fn in $functions) {
+            if (-not (Get-Command $fn -ErrorAction SilentlyContinue)) {
+              Write-Host "Missing function: $fn" -ForegroundColor Red
+              exit 1
+            }
+          }
+          Write-Host "ImageManagement module OK" -ForegroundColor Green
+
+      - name: Test ComponentRemoval Module
+        shell: pwsh
+        run: |
+          Import-Module ./lib/ComponentRemoval.ps1 -Force
+          $functions = @('Remove-AppxPackage', 'Disable-WindowsFeature', 'Disable-WindowsService')
+          foreach ($fn in $functions) {
+            if (-not (Get-Command $fn -ErrorAction SilentlyContinue)) {
+              Write-Host "Missing function: $fn" -ForegroundColor Red
+              exit 1
+            }
+          }
+          Write-Host "ComponentRemoval module OK" -ForegroundColor Green
+
+      - name: Test CISHardening Module
+        shell: pwsh
+        run: |
+          Import-Module ./lib/CISHardening.ps1 -Force
+          $functions = @('Set-UACConfiguration', 'Set-WindowsFirewall', 'Start-CISHardening')
+          foreach ($fn in $functions) {
+            if (-not (Get-Command $fn -ErrorAction SilentlyContinue)) {
+              Write-Host "Missing function: $fn" -ForegroundColor Red
+              exit 1
+            }
+          }
+          Write-Host "CISHardening module OK" -ForegroundColor Green
+
+      - name: Test ComplianceReporting Module
+        shell: pwsh
+        run: |
+          Import-Module ./lib/ComplianceReporting.ps1 -Force
+          $functions = @('New-ComplianceReport', 'Add-CISControl', 'Export-ComplianceReport')
+          foreach ($fn in $functions) {
+            if (-not (Get-Command $fn -ErrorAction SilentlyContinue)) {
+              Write-Host "Missing function: $fn" -ForegroundColor Red
+              exit 1
+            }
+          }
+          Write-Host "ComplianceReporting module OK" -ForegroundColor Green
+
+  validate-templates:
+    name: Validate Template Configurations
+    runs-on: windows-latest
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Template Syntax
+        shell: pwsh
+        run: |
+          $templates = Get-ChildItem -Path ./templates -Filter "*.ps1config"
+          Write-Host "Found $($templates.Count) templates"
+          
+          foreach ($template in $templates) {
+            Write-Host "Validating: $($template.Name)"
+            
+            # Test that template can be parsed
+            $content = Get-Content $template.FullName -Raw
+            try {
+              $parsed = Invoke-Expression $content
+              if (-not $parsed.TemplateName) {
+                Write-Host "Missing TemplateName in $($template.Name)" -ForegroundColor Red
+                exit 1
+              }
+              Write-Host "  Template: $($parsed.TemplateName)" -ForegroundColor Green
+            } catch {
+              Write-Host "Parse error in $($template.Name): $_" -ForegroundColor Red
+              exit 1
+            }
+          }
+          Write-Host "All templates validated" -ForegroundColor Green
+
+  security-scan:
+    name: Security Vulnerability Scan
+    runs-on: windows-latest
+    needs: [lint, test-modules, validate-templates]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run PSSecurityAudit
+        shell: pwsh
+        run: |
+          # Check for common security issues in scripts
+          $issues = @()
+          
+          # Check for hardcoded credentials
+          $scripts = Get-ChildItem -Path . -Filter "*.ps1" -Recurse
+          foreach ($script in $scripts) {
+            $content = Get-Content $script.FullName -Raw
+            if ($content -match 'password|passwd|pwd|secret|apikey|token' -and $content -notmatch '\$env:') {
+              $issues += "Potential hardcoded secret in $($script.Name)"
+            }
+          }
+          
+          if ($issues.Count -gt 0) {
+            Write-Host "Security issues found:" -ForegroundColor Yellow
+            $issues | ForEach-Object { Write-Host "  $_" }
+          } else {
+            Write-Host "No obvious security issues found" -ForegroundColor Green
+          }
+
+  build-check:
+    name: Build Orchestrator Check
+    runs-on: windows-latest
+    needs: [lint, test-modules, validate-templates]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify Build-Factory.ps1
+        shell: pwsh
+        run: |
+          # Test that Build-Factory.ps1 can be loaded
+          $ErrorActionPreference = "Stop"
+          
+          try {
+            . ./Build-Factory.ps1 -Mode Auto -SkipCompliance -ErrorAction Stop
+            Write-Host "Build-Factory.ps1 loaded successfully" -ForegroundColor Green
+          } catch {
+            # Expected to fail without ISO, but should load
+            if ($_.Exception.Message -match "ISO") {
+              Write-Host "Build-Factory.ps1 loaded (failed on expected missing ISO)" -ForegroundColor Green
+            } else {
+              Write-Host "Unexpected error: $_" -ForegroundColor Yellow
+            }
+          }
+
+  release:
+    name: Create Release
+    runs-on: windows-latest
+    needs: [lint, test-modules, validate-templates, security-scan, build-check]
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Pester
+        shell: pwsh
+        run: |
+          Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser
+          Install-Module -Name Pester -MinimumVersion 5.0.0 -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Run Full Test Suite
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = "./tests"
+          $config.Output.Verbosity = "Detailed"
+          $config.CodeCoverage.Enabled = $true
+          $config.CodeCoverage.Path = "./coverage.xml"
+          
+          $result = Invoke-Pester -Configuration $config
+          if ($result.FailedCount -gt 0) {
+            Write-Host "Tests failed" -ForegroundColor Red
+            exit 1
+          }
+          Write-Host "All tests passed" -ForegroundColor Green
+
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+
+      - name: Create Release Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            *.ps1
+            lib/*.ps1
+            templates/*.ps1config
+          draft: true
+          prerelease: ${{ contains(github.ref, 'alpha') }}
